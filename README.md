@@ -8,6 +8,8 @@ MadCrowLib is a library of stand alone header files that provide macros for comm
 "mad crow" because it sounds a bit like "macro"
 
 madcrow_buffer.h
+----------------
+
 Define a buffer with functions to alloc, resize, add, append, reset etc.
 
 Example:
@@ -70,6 +72,6 @@ Creates:
 We also provide general macros to create an empty (unallocated) list, and a
 macro to verify that a list is a valid structure:
 
-   CharList clist = madcrow_list_init;
-   madcrow_list_verify(&clist);
+    CharList clist = madcrow_list_init;
+    madcrow_list_verify(&clist);
 
