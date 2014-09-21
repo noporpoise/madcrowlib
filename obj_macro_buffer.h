@@ -7,7 +7,7 @@
 
 //
 // objbuf_macro.h
-// Define a buffer with functions to alloc, dealloc, resize, add, append, reset
+// Define a buffer with functions to alloc, resize, add, append, reset etc.
 //
 // Example:
 //
@@ -21,14 +21,18 @@
 //     size_t len, capacity;
 //   } String;
 //
-//   void charbuf_alloc(String *buf, size_t capacity)
-//   void charbuf_dealloc(String *buf)
-//   void charbuf_ensure_capacity(String *buf, size_t capacity)
-//   size_t charbuf_add(String *buf, char obj)
-//   ssize_t charbuf_attempt_add(String *buf, char obj)
-//   void charbuf_append(String *buf, char *obj, size_t n)
-//   void charbuf_reset(String *buf)
-//   void charbuf_shift(String *buf, size_t n)
+//   void    charbuf_alloc       (String *buf, size_t capacity)
+//   void    charbuf_dealloc     (String *buf)
+//   void    charbuf_reset       (String *buf)
+//   void    charbuf_capacity    (String *buf, size_t capacity)
+//   size_t  charbuf_add         (String *buf, char obj)
+//   ssize_t charbuf_attempt_add (String *buf, char obj)
+//   void    charbuf_append      (String *buf, char *obj, size_t n)
+//   void    charbuf_shift_left  (String *buf, size_t n)
+//   void    charbuf_shift_right (String *buf, size_t n)
+//
+//  String string = obj_macro_buffer_init;
+//  obj_macro_buffer_verify(&string);
 //
 
 // Round a number up to the nearest number that is a power of two
@@ -58,7 +62,7 @@ static inline void FUNC ## _alloc(buf_t *buf, size_t capacity)                 \
  __attribute__((unused));                                                      \
 static inline void FUNC ## _dealloc(buf_t *buf)                                \
  __attribute__((unused));                                                      \
-static inline void FUNC ## _ensure_capacity(buf_t *buf, size_t cap)            \
+static inline void FUNC ## _capacity(buf_t *buf, size_t cap)                   \
  __attribute__((unused));                                                      \
 static inline size_t FUNC ## _add(buf_t *buf, obj_t obj)                       \
  __attribute__((unused));                                                      \
@@ -85,7 +89,7 @@ static inline void FUNC ## _dealloc(buf_t *buf) {                              \
   memset(buf, 0, sizeof(buf_t));                                               \
 }                                                                              \
                                                                                \
-static inline void FUNC ## _ensure_capacity(buf_t *buf, size_t cap) {          \
+static inline void FUNC ## _capacity(buf_t *buf, size_t cap) {                 \
   if(cap > buf->capacity) {                                                    \
     cap = roundup2pow(cap);                                                    \
     buf->data = realloc(buf->data, buf->capacity * sizeof(obj_t));             \
@@ -95,7 +99,7 @@ static inline void FUNC ## _ensure_capacity(buf_t *buf, size_t cap) {          \
                                                                                \
 /* Returns index of new object in buffer */                                    \
 static inline size_t FUNC ## _add(buf_t *buf, obj_t obj) {                     \
-  FUNC ## _ensure_capacity(buf, buf->len+1);                                   \
+  FUNC ## _capacity(buf, buf->len+1);                                          \
   memcpy(buf->data+buf->len, &obj, sizeof(obj));                               \
   return buf->len++;                                                           \
 }                                                                              \
@@ -109,7 +113,7 @@ static inline ssize_t FUNC ## _attempt_add(buf_t *buf, obj_t obj) {            \
                                                                                \
 /* Returns index of first new object in buffer */                              \
 static inline size_t FUNC ## _append(buf_t *buf, const obj_t *obj, size_t n) { \
-  FUNC ## _ensure_capacity(buf, buf->len+n);                                   \
+  FUNC ## _capacity(buf, buf->len+n);                                          \
   memcpy(buf->data+buf->len, obj, n*sizeof(obj_t));                            \
   size_t idx = buf->len;                                                       \
   buf->len += n;                                                               \
@@ -118,7 +122,7 @@ static inline size_t FUNC ## _append(buf_t *buf, const obj_t *obj, size_t n) { \
                                                                                \
 static inline void FUNC ## _shift_left(buf_t *buf, size_t n)                   \
 {                                                                              \
-  FUNC ## _ensure_capacity(buf, buf->len+n);                                   \
+  FUNC ## _capacity(buf, buf->len+n);                                          \
   memmove(buf->data+n, buf->data, buf->len * sizeof(obj_t));                   \
   buf->len += n;                                                               \
 }                                                                              \

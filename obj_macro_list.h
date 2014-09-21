@@ -5,6 +5,37 @@
 #include <string.h> // memset
 #include <assert.h>
 
+//
+// obj_macro_list.h
+// Define a list with functions to alloc, reset, push, pop, shift, unshift etc.
+//
+// Example:
+//
+//   #include "obj_macro_list.h"
+//   obj_macro_list_create(clist,CharList,char)
+//
+// Creates:
+//
+//   typedef struct {
+//     char *data;
+//     size_t len, capacity;
+//   } CharList;
+//
+//   void   clist_alloc   (CharList *buf, size_t capacity)
+//   void   clist_dealloc (CharList *buf)
+//   void   clist_reset   (CharList *buf)
+//   void   clist_capacity(CharList *buf, size_t capacity)
+//   size_t clist_push    (CharList *buf, char obj)
+//   char   clist_pop     (CharList *buf)
+//   size_t clist_shift   (CharList *buf, char obj)
+//   char   clist_unshift (CharList *buf)
+//   char*  clist_get     (CharList *buf, size_t idx)
+//   size_t clist_length  (const CharList *buf)
+//
+//  CharList clist = obj_macro_list_init;
+//  obj_macro_list_verify(&clist);
+//
+
 // Round a number up to the nearest number that is a power of two
 #ifndef leading_zeros
   #define leading_zeros(x) ((x) ? (__typeof(x))__builtin_clzll(x) : (__typeof(x))sizeof(x)*8)
@@ -33,7 +64,7 @@ static inline void FUNC ## _alloc(list_t *list, size_t capacity)               \
  __attribute__((unused));                                                      \
 static inline void FUNC ## _dealloc(list_t *list)                              \
  __attribute__((unused));                                                      \
-static inline void FUNC ## _ensure_capacity(list_t *list, size_t cap)          \
+static inline void FUNC ## _capacity(list_t *list, size_t cap)                 \
  __attribute__((unused));                                                      \
 static inline size_t FUNC ## _push(list_t *list, obj_t obj)                    \
  __attribute__((unused));                                                      \
@@ -45,12 +76,12 @@ static inline obj_t  FUNC ## _unshift(list_t *list)                            \
  __attribute__((unused));                                                      \
 static inline void FUNC ## _reset(list_t *list)                                \
  __attribute__((unused));                                                      \
-static inline size_t FUNC ## _length(list_t *list)                             \
+static inline size_t FUNC ## _length(const list_t *list)                       \
  __attribute__((unused));                                                      \
 static inline obj_t* FUNC ## _get(list_t *list, size_t idx)                    \
  __attribute__((unused));                                                      \
                                                                                \
-static inline size_t FUNC ## _length(list_t *list) {                           \
+static inline size_t FUNC ## _length(const list_t *list) {                     \
   obj_macro_list_verify(list);                                                 \
   return list->end - list->start + 1;                                          \
 }                                                                              \
@@ -73,7 +104,7 @@ static inline void FUNC ## _dealloc(list_t *list) {                            \
   memset(list, 0, sizeof(list_t));                                             \
 }                                                                              \
                                                                                \
-static inline void FUNC ## _ensure_capacity(list_t *list, size_t cap) {        \
+static inline void FUNC ## _capacity(list_t *list, size_t cap) {               \
   if(cap > list->capacity) {                                                   \
     cap = roundup2pow(cap);                                                    \
     list->data = realloc(list->data, list->capacity * sizeof(obj_t));          \
