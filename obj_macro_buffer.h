@@ -6,7 +6,7 @@
 #include <assert.h>
 
 //
-// objbuf_macro.h
+// obj_macro_buffer.h
 // Define a buffer with functions to alloc, resize, add, append, reset etc.
 //
 // Example:
@@ -39,9 +39,18 @@
 #ifndef leading_zeros
   #define leading_zeros(x) ((x) ? (__typeof(x))__builtin_clzll(x) : (__typeof(x))sizeof(x)*8)
 #endif
+
 #ifndef roundup2pow
   #define roundup2pow(x) (1UL << (64 - leading_zeros(x)))
 #endif
+
+#ifndef BC_MALLOC
+  #define BC_MALLOC  malloc
+#endif
+#ifndef BC_REALLOC
+  #define BC_REALLOC realloc
+#endif
+
 
 #define obj_macro_buffer_init {.data = NULL, .len = 0, .capacity = 0}
 
@@ -80,7 +89,7 @@ static inline void FUNC ## _shift_right(buf_t *buf, size_t nel)                \
                                                                                \
 static inline void FUNC ## _alloc(buf_t *buf, size_t capacity) {               \
   buf->capacity = capacity;                                                    \
-  buf->data = malloc(buf->capacity * sizeof(obj_t));                           \
+  buf->data = BC_MALLOC(buf->capacity * sizeof(obj_t));                        \
   buf->len = 0;                                                                \
 }                                                                              \
                                                                                \
@@ -92,7 +101,7 @@ static inline void FUNC ## _dealloc(buf_t *buf) {                              \
 static inline void FUNC ## _capacity(buf_t *buf, size_t cap) {                 \
   if(cap > buf->capacity) {                                                    \
     cap = roundup2pow(cap);                                                    \
-    buf->data = realloc(buf->data, buf->capacity * sizeof(obj_t));             \
+    buf->data = BC_REALLOC(buf->data, buf->capacity * sizeof(obj_t));          \
     buf->capacity = cap;                                                       \
   }                                                                            \
 }                                                                              \

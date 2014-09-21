@@ -40,9 +40,18 @@
 #ifndef leading_zeros
   #define leading_zeros(x) ((x) ? (__typeof(x))__builtin_clzll(x) : (__typeof(x))sizeof(x)*8)
 #endif
+
 #ifndef roundup2pow
   #define roundup2pow(x) (1UL << (64 - leading_zeros(x)))
 #endif
+
+#ifndef BC_MALLOC
+  #define BC_MALLOC  malloc
+#endif
+#ifndef BC_REALLOC
+  #define BC_REALLOC realloc
+#endif
+
 
 #define obj_macro_list_init {.data = NULL, .start = 0, .end = 0, .capacity = 0}
 
@@ -94,7 +103,7 @@ static inline obj_t* FUNC ## _get(list_t *list, size_t idx) {                  \
                                                                                \
 static inline void FUNC ## _alloc(list_t *list, size_t capacity) {             \
   list->capacity = capacity < 8 ? 8 : roundup2pow(capacity);                   \
-  list->data = malloc(list->capacity * sizeof(obj_t));                         \
+  list->data = BC_MALLOC(list->capacity * sizeof(obj_t));                      \
   list->start = list->end = list->capacity / 2;                                \
 }                                                                              \
                                                                                \
@@ -107,7 +116,7 @@ static inline void FUNC ## _dealloc(list_t *list) {                            \
 static inline void FUNC ## _capacity(list_t *list, size_t cap) {               \
   if(cap > list->capacity) {                                                   \
     cap = roundup2pow(cap);                                                    \
-    list->data = realloc(list->data, list->capacity * sizeof(obj_t));          \
+    list->data = BC_REALLOC(list->data, list->capacity * sizeof(obj_t));       \
     list->capacity = cap;                                                      \
   }                                                                            \
 }                                                                              \
@@ -120,7 +129,7 @@ static inline size_t FUNC ## _push(list_t *list, obj_t obj) {                  \
     size_t half = list->capacity / 2;                                          \
     if(n >= half) {                                                            \
       list->capacity *= 2;                                                     \
-      list->data = realloc(list->data, list->capacity);                        \
+      list->data = BC_REALLOC(list->data, list->capacity);                     \
     }                                                                          \
     else {                                                                     \
       size_t new_start = n; /* or = half - n */                                \
@@ -148,7 +157,7 @@ static inline size_t FUNC ## _shift(list_t *list, obj_t obj) {                 \
     size_t half = list->capacity / 2;                                          \
     if(n >= half) {                                                            \
       list->capacity *= 2;                                                     \
-      list->data = realloc(list->data, list->capacity);                        \
+      list->data = BC_REALLOC(list->data, list->capacity);                     \
     }                                                                          \
     size_t new_start = list->capacity - (2*n); /* or = half */                 \
     memmove(list->data + new_start, list->data + list->start, n);              \
