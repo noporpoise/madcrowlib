@@ -92,7 +92,7 @@ static inline obj_t* FUNC ## _get(list_t *list, size_t idx)                    \
                                                                                \
 static inline size_t FUNC ## _length(const list_t *list) {                     \
   madcrow_list_verify(list);                                                   \
-  return list->end - list->start + 1;                                          \
+  return list->end - list->start;                                              \
 }                                                                              \
                                                                                \
 static inline obj_t* FUNC ## _get(list_t *list, size_t idx) {                  \

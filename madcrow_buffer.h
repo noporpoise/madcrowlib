@@ -100,7 +100,7 @@ static inline void FUNC ## _dealloc(buf_t *buf) {                              \
                                                                                \
 static inline void FUNC ## _capacity(buf_t *buf, size_t cap) {                 \
   if(cap > buf->capacity) {                                                    \
-    cap = roundup2pow(cap);                                                    \
+    buf->capacity = roundup2pow(cap);                                          \
     buf->data = MC_REALLOC(buf->data, buf->capacity * sizeof(obj_t));          \
     buf->capacity = cap;                                                       \
   }                                                                            \
