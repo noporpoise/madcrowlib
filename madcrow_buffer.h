@@ -6,13 +6,13 @@
 #include <assert.h>
 
 //
-// obj_macro_buffer.h
+// madcrow_buffer.h
 // Define a buffer with functions to alloc, resize, add, append, reset etc.
 //
 // Example:
 //
-//   #include "obj_macro_buffer.h"
-//   obj_macro_buffer_create(charbuf,String,char)
+//   #include "madcrow_buffer.h"
+//   madcrow_buffer_create(charbuf,String,char)
 //
 // Creates:
 //
@@ -31,8 +31,8 @@
 //   void    charbuf_shift_left  (String *buf, size_t n)
 //   void    charbuf_shift_right (String *buf, size_t n)
 //
-//  String string = obj_macro_buffer_init;
-//  obj_macro_buffer_verify(&string);
+//  String string = madcrow_buffer_init;
+//  madcrow_buffer_verify(&string);
 //
 
 // Round a number up to the nearest number that is a power of two
@@ -44,22 +44,22 @@
   #define roundup2pow(x) (1UL << (64 - leading_zeros(x)))
 #endif
 
-#ifndef BC_MALLOC
-  #define BC_MALLOC  malloc
+#ifndef MC_MALLOC
+  #define MC_MALLOC  malloc
 #endif
-#ifndef BC_REALLOC
-  #define BC_REALLOC realloc
+#ifndef MC_REALLOC
+  #define MC_REALLOC realloc
 #endif
 
 
-#define obj_macro_buffer_init {.data = NULL, .len = 0, .capacity = 0}
+#define madcrow_buffer_init {.data = NULL, .len = 0, .capacity = 0}
 
-#define obj_macro_buffer_verify(buf) do {                                      \
+#define madcrow_buffer_verify(buf) do {                                        \
   assert(buf->len <= buf->capacity);                                           \
   assert(buf->capacity == 0 || buf->data != NULL);                             \
 } while(0)
 
-#define obj_macro_buffer_create(FUNC,buf_t,obj_t)                              \
+#define madcrow_buffer_create(FUNC,buf_t,obj_t)                                \
                                                                                \
 typedef struct {                                                               \
   obj_t *data;                                                                 \
@@ -89,7 +89,7 @@ static inline void FUNC ## _shift_right(buf_t *buf, size_t nel)                \
                                                                                \
 static inline void FUNC ## _alloc(buf_t *buf, size_t capacity) {               \
   buf->capacity = capacity;                                                    \
-  buf->data = BC_MALLOC(buf->capacity * sizeof(obj_t));                        \
+  buf->data = MC_MALLOC(buf->capacity * sizeof(obj_t));                        \
   buf->len = 0;                                                                \
 }                                                                              \
                                                                                \
@@ -101,7 +101,7 @@ static inline void FUNC ## _dealloc(buf_t *buf) {                              \
 static inline void FUNC ## _capacity(buf_t *buf, size_t cap) {                 \
   if(cap > buf->capacity) {                                                    \
     cap = roundup2pow(cap);                                                    \
-    buf->data = BC_REALLOC(buf->data, buf->capacity * sizeof(obj_t));          \
+    buf->data = MC_REALLOC(buf->data, buf->capacity * sizeof(obj_t));          \
     buf->capacity = cap;                                                       \
   }                                                                            \
 }                                                                              \

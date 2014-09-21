@@ -1,7 +1,7 @@
 
 all: test
 
-test: test.c obj_macro_list.h obj_macro_buffer.h
+test: test.c madcrow_list.h madcrow_buffer.h
 	$(CC) -std=c99 -Wall -Wextra -pedantic -o $@ $<
 
 clean:
