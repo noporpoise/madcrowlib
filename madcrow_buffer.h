@@ -1,5 +1,5 @@
-#ifndef OBJ_MACRO_BUFFER_H_
-#define OBJ_MACRO_BUFFER_H_
+#ifndef MADCROW_BUFFER_H_
+#define MADCROW_BUFFER_H_
 
 #include <stdlib.h>
 #include <string.h> // memset
@@ -147,4 +147,4 @@ static inline void FUNC ## _reset(buf_t *buf) { buf->len = 0; }                \
 \
 
 
-#endif /* OBJ_MACRO_BUFFER_H_ */
+#endif /* MADCROW_BUFFER_H_ */

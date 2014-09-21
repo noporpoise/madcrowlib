@@ -1,5 +1,5 @@
-#ifndef OBJ_MACRO_LIST_H_
-#define OBJ_MACRO_LIST_H_
+#ifndef MADCROW_LIST_H_
+#define MADCROW_LIST_H_
 
 #include <stdlib.h>
 #include <string.h> // memset
@@ -180,4 +180,4 @@ static inline void FUNC ## _reset(list_t *list) {                              \
   list->start = list->end = list->capacity / 2;                                \
 }
 
-#endif /* OBJ_MACRO_LIST_H_ */
+#endif /* MADCROW_LIST_H_ */
