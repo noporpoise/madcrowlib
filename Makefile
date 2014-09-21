@@ -1,10 +1,13 @@
 
 all: test
 
-test: test.c madcrow_list.h madcrow_buffer.h
+run_tests: test.c madcrow_list.h madcrow_buffer.h
 	$(CC) -std=c99 -Wall -Wextra -o $@ $<
 
-clean:
-	rm -rf test
+test: run_tests
+	./run_tests
 
-.PHONY: all
+clean:
+	rm -rf run_tests
+
+.PHONY: all clean test

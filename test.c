@@ -69,6 +69,14 @@ static void test_buffer()
 
 int main()
 {
+  #ifdef NDEBUG
+    printf("Must compile without NDEBUG=1\n");
+    exit(-1);
+  #endif
+
   test_list();
   test_buffer();
+
+  printf("  Tests Finished. Zero Errors\n");
+  return 0;
 }
