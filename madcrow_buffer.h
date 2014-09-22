@@ -59,7 +59,7 @@
   assert(buf->capacity == 0 || buf->data != NULL);                             \
 } while(0)
 
-#define madcrow_buffer_create(FUNC,buf_t,obj_t)                                \
+#define madcrow_buffer(FUNC,buf_t,obj_t)                                       \
                                                                                \
 typedef struct {                                                               \
   obj_t *data;                                                                 \

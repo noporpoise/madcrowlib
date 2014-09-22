@@ -61,7 +61,7 @@
   assert(list->capacity == 0 || list->data != NULL);                           \
 } while(0)
 
-#define madcrow_list_create(FUNC,list_t,obj_t)                                 \
+#define madcrow_list(FUNC,list_t,obj_t)                                        \
                                                                                \
 typedef struct {                                                               \
   obj_t *data;                                                                 \

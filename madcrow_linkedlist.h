@@ -47,7 +47,7 @@
   }                                                                            \
 } while(0)
 
-#define madcrow_linkedlist_create(FUNC,list_t,node_t,obj_t)                    \
+#define madcrow_linkedlist(FUNC,list_t,node_t,obj_t)                           \
                                                                                \
 typedef struct __##node_t node_t;                                              \
                                                                                \

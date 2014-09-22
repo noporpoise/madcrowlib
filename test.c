@@ -5,13 +5,13 @@
 // #define MC_REALLOC realloc2
 
 #include "madcrow_list.h"
-madcrow_list_create(alist,SizeList,size_t);
+madcrow_list(alist,SizeList,size_t);
 
 #include "madcrow_buffer.h"
-madcrow_buffer_create(abuf,SizeBuffer,size_t);
+madcrow_buffer(abuf,SizeBuffer,size_t);
 
 #include "madcrow_linkedlist.h"
-madcrow_linkedlist_create(llist,LinkedList,LinkedNode,size_t);
+madcrow_linkedlist(llist,LinkedList,LinkedNode,size_t);
 
 static void test_list()
 {
