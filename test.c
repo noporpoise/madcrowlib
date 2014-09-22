@@ -10,6 +10,8 @@ madcrow_list_create(alist,SizeList,size_t);
 #include "madcrow_buffer.h"
 madcrow_buffer_create(abuf,SizeBuffer,size_t);
 
+#include "madcrow_linkedlist.h"
+madcrow_linkedlist_create(llist,LinkedList,LinkedNode,size_t);
 
 static void test_list()
 {

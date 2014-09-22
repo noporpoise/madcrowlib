@@ -75,3 +75,38 @@ macro to verify that a list is a valid structure:
     CharList clist = madcrow_list_init;
     madcrow_list_verify(&clist);
 
+
+madcrow_linkedlist.h
+--------------------
+
+Define a doubly-linked list with functions to push, pop, shift, unshift etc.
+
+Example:
+
+    #include "madcrow_linkedlist.h"
+    madcrow_linkedlist_create(llist,LinkedList,LinkedNode,char)
+
+Creates:
+
+    typedef struct {
+      char data;
+      LinkedNode *next, *prev;
+    } LinkedNode;
+
+    typedef struct {
+      LinkedNode *first, *last;
+    } LinkedList;
+
+    void        llist_init    (LinkedList *llist)
+    void        llist_push    (LinkedList *llist, LinkedNode *obj)
+    LinkedNode* llist_pop     (LinkedList *llist)
+    void        llist_shift   (LinkedList *llist, LinkedNode *obj)
+    LinkedNode* llist_unshift (LinkedList *llist)
+    size_t      llist_length  (const LinkedList *llist)
+
+We also provide general macros to create an empty (unallocated) list, and a
+macro to verify that a linkedlist is a valid structure:
+
+    LinkedList llist = madcrow_linkedlist_init;
+    madcrow_linkedlist_verify(&llist);
+
