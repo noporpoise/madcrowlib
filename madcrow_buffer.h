@@ -45,8 +45,8 @@
   #define roundup2pow(x) (1UL << (64 - leading_zeros(x)))
 #endif
 
-#ifndef MC_MALLOC
-  #define MC_MALLOC  malloc
+#ifndef MC_CALLOC
+  #define MC_CALLOC  calloc
 #endif
 #ifndef MC_REALLOC
   #define MC_REALLOC realloc
@@ -90,7 +90,7 @@ static inline void FUNC ## _shift_right(buf_t *buf, size_t nel)                \
                                                                                \
 static inline void FUNC ## _alloc(buf_t *buf, size_t capacity) {               \
   buf->capacity = capacity;                                                    \
-  buf->data = MC_MALLOC(buf->capacity * sizeof(obj_t));                        \
+  buf->data = MC_CALLOC(buf->capacity, sizeof(obj_t));                         \
   buf->len = 0;                                                                \
 }                                                                              \
                                                                                \

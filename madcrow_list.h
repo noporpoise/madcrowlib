@@ -46,8 +46,8 @@
   #define roundup2pow(x) (1UL << (64 - leading_zeros(x)))
 #endif
 
-#ifndef MC_MALLOC
-  #define MC_MALLOC  malloc
+#ifndef MC_CALLOC
+  #define MC_CALLOC  calloc
 #endif
 #ifndef MC_REALLOC
   #define MC_REALLOC realloc
@@ -104,7 +104,7 @@ static inline obj_t* FUNC ## _get(list_t *list, size_t idx) {                  \
                                                                                \
 static inline void FUNC ## _alloc(list_t *list, size_t capacity) {             \
   list->capacity = capacity < 8 ? 8 : roundup2pow(capacity);                   \
-  list->data = MC_MALLOC(list->capacity * sizeof(obj_t));                      \
+  list->data = MC_CALLOC(list->capacity, sizeof(obj_t));                       \
   list->start = list->end = list->capacity / 2;                                \
 }                                                                              \
                                                                                \

@@ -1,72 +1,86 @@
 #include <stdlib.h>
 #include <stdio.h>
 
-// #define MC_MALLOC  malloc2
+// #define MC_CALLOC  calloc2
 // #define MC_REALLOC realloc2
 
 #include "madcrow_list.h"
-madcrow_list(alist,SizeList,size_t);
+madcrow_list(list,SizeList,size_t);
 
 #include "madcrow_buffer.h"
-madcrow_buffer(abuf,SizeBuffer,size_t);
+madcrow_buffer(buf,SizeBuffer,size_t);
 
 #include "madcrow_linkedlist.h"
 madcrow_linkedlist(llist,LinkedList,LinkedNode,size_t);
-
-static void test_list()
-{
-  size_t i;
-  SizeList alist;
-  alist_alloc(&alist, 1024);
-
-  alist_push(&alist, 1);
-  alist_push(&alist, 2);
-  alist_push(&alist, 3);
-
-  assert(alist_length(&alist) == 3);
-
-  alist_pop(&alist);
-  alist_pop(&alist);
-  alist_pop(&alist);
-
-  assert(alist_length(&alist) == 0);
-
-  alist_shift(&alist, 1);
-  alist_shift(&alist, 2);
-  alist_shift(&alist, 3);
-
-  assert(alist_length(&alist) == 3);
-
-  alist_unshift(&alist);
-  alist_unshift(&alist);
-  alist_unshift(&alist);
-
-  assert(alist_length(&alist) == 0);
-
-  alist_push(&alist, 14);
-  alist_push(&alist, 15);
-  alist_push(&alist, 16);
-  alist_shift(&alist, 13);
-  alist_shift(&alist, 12);
-  alist_shift(&alist, 11);
-
-  assert(alist_length(&alist) == 6);
-
-  for(i = 0; i < 6; i++) assert(*alist_get(&alist, i) == i+11);
-
-  alist_dealloc(&alist);
-}
 
 static void test_buffer()
 {
   size_t i;
   SizeBuffer abuf;
-  abuf_alloc(&abuf, 8);
+  buf_alloc(&abuf, 8);
 
-  for(i = 0; i < 100; i++) assert(i == abuf_add(&abuf, i));
+  for(i = 0; i < 100; i++) assert(i == buf_add(&abuf, i));
   for(i = 0; i < 100; i++) assert(abuf.data[i] == i);
 
-  abuf_dealloc(&abuf);
+  buf_dealloc(&abuf);
+}
+
+static void test_list()
+{
+  size_t i;
+  SizeList alist;
+  list_alloc(&alist, 8);
+
+  list_push(&alist, 1);
+  list_push(&alist, 2);
+  list_push(&alist, 3);
+
+  assert(list_length(&alist) == 3);
+
+  list_pop(&alist);
+  list_pop(&alist);
+  list_pop(&alist);
+
+  assert(list_length(&alist) == 0);
+
+  list_shift(&alist, 1);
+  list_shift(&alist, 2);
+  list_shift(&alist, 3);
+
+  assert(list_length(&alist) == 3);
+
+  list_unshift(&alist);
+  list_unshift(&alist);
+  list_unshift(&alist);
+
+  assert(list_length(&alist) == 0);
+
+  list_push(&alist, 14);
+  list_push(&alist, 15);
+  list_push(&alist, 16);
+  list_shift(&alist, 13);
+  list_shift(&alist, 12);
+  list_shift(&alist, 11);
+
+  assert(list_length(&alist) == 6);
+
+  for(i = 0; i < 6; i++) assert(*list_get(&alist, i) == i+11);
+
+  list_dealloc(&alist);
+}
+
+static void test_linked_list()
+{
+  size_t i;
+  LinkedList llist;
+  llist_init(&llist);
+  LinkedNode nodes[100];
+
+  for(i = 0; i < 100; i++) {
+    nodes[i].data = i;
+    llist_push(&llist, &nodes[i]);
+    assert(llist.last == &nodes[i]);
+  }
 }
 
 int main()
@@ -76,8 +90,9 @@ int main()
     exit(-1);
   #endif
 
-  test_list();
   test_buffer();
+  test_list();
+  test_linked_list();
 
   printf("  Tests Finished. Zero Errors\n");
   return 0;

@@ -7,6 +7,11 @@ MadCrowLib is a library of stand alone header files that provide macros for comm
 
 "mad crow" because it sounds a bit like "macro"
 
+You can override the memory allocators used with:
+
+    #define MC_CALLOC  calloc2
+    #define MC_REALLOC realloc2
+
 madcrow_buffer.h
 ----------------
 
