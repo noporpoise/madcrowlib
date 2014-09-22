@@ -4,6 +4,7 @@
 #include <stdlib.h>
 #include <string.h> // memset
 #include <assert.h>
+#include <unistd.h> // ssize_t
 
 //
 // madcrow_buffer.h
