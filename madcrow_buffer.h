@@ -45,6 +45,9 @@
   #define roundup2pow(x) (1UL << (64 - leading_zeros(x)))
 #endif
 
+#ifndef MC_MALLOC
+  #define MC_MALLOC(x,y)  malloc((x)*(y))
+#endif
 #ifndef MC_CALLOC
   #define MC_CALLOC  calloc
 #endif
@@ -60,7 +63,17 @@
   assert(buf->capacity == 0 || buf->data != NULL);                             \
 } while(0)
 
-#define madcrow_buffer(FUNC,buf_t,obj_t)                                       \
+#define MC_INIT_MEM_WIPE(arr,n) memset(arr, 0, (n)*sizeof(*(arr)))
+#define MC_INIT_MEM_UNDEF(arr,n)
+
+#define madcrow_buffer(FUNC,buf_t,obj_t) \
+        madcrow_buffer2(FUNC,buf_t,obj_t,MC_MALLOC,MC_INIT_MEM_UNDEF)
+
+#define madcrow_buffer_wipe(FUNC,buf_t,obj_t) \
+        madcrow_buffer2(FUNC,buf_t,obj_t,MC_CALLOC,MC_INIT_MEM_WIPE)
+
+// init_mem_f is one of MC_INIT_MEM_WIPE or MC_INIT_MEM_UNDEF
+#define madcrow_buffer2(FUNC,buf_t,obj_t,alloc,init_mem_f)                     \
                                                                                \
 typedef struct {                                                               \
   obj_t *data;                                                                 \
@@ -86,11 +99,13 @@ static inline void FUNC ## _shift_left(buf_t *buf, size_t nel)                 \
  __attribute__((unused));                                                      \
 static inline void FUNC ## _shift_right(buf_t *buf, size_t nel)                \
  __attribute__((unused));                                                      \
+static inline void FUNC ## _remove(buf_t *buf, size_t n)                       \
+ __attribute__((unused));                                                      \
                                                                                \
                                                                                \
 static inline void FUNC ## _alloc(buf_t *buf, size_t capacity) {               \
   buf->capacity = capacity;                                                    \
-  buf->data = MC_CALLOC(buf->capacity, sizeof(obj_t));                         \
+  buf->data = alloc(buf->capacity, sizeof(obj_t));                             \
   buf->len = 0;                                                                \
 }                                                                              \
                                                                                \
@@ -101,8 +116,9 @@ static inline void FUNC ## _dealloc(buf_t *buf) {                              \
                                                                                \
 static inline void FUNC ## _capacity(buf_t *buf, size_t cap) {                 \
   if(cap > buf->capacity) {                                                    \
-    buf->capacity = roundup2pow(cap);                                          \
-    buf->data = MC_REALLOC(buf->data, buf->capacity * sizeof(obj_t));          \
+    cap = roundup2pow(cap);                                                    \
+    buf->data = MC_REALLOC(buf->data, cap * sizeof(obj_t));                    \
+    init_mem_f(buf->data + buf->capacity, cap - buf->capacity);                \
     buf->capacity = cap;                                                       \
   }                                                                            \
 }                                                                              \
@@ -135,6 +151,7 @@ static inline void FUNC ## _shift_left(buf_t *buf, size_t n)                   \
   FUNC ## _capacity(buf, buf->len+n);                                          \
   memmove(buf->data+n, buf->data, buf->len * sizeof(obj_t));                   \
   buf->len += n;                                                               \
+  init_mem_f(buf->data, n);                                                    \
 }                                                                              \
                                                                                \
 static inline void FUNC ## _shift_right(buf_t *buf, size_t n)                  \
@@ -142,10 +159,17 @@ static inline void FUNC ## _shift_right(buf_t *buf, size_t n)                  \
   assert(n <= buf->len);                                                       \
   memmove(buf->data, buf->data+n, (buf->len - n)*sizeof(obj_t));               \
   buf->len -= n;                                                               \
+  init_mem_f(buf->data+buf->len, n);                                           \
 }                                                                              \
                                                                                \
-static inline void FUNC ## _reset(buf_t *buf) { buf->len = 0; }                \
-\
-
+static inline void FUNC ## _remove(buf_t *buf, size_t n) {                     \
+  buf->len -= n;                                                               \
+  init_mem_f(buf->data+buf->len, n);                                           \
+}                                                                              \
+                                                                               \
+static inline void FUNC ## _reset(buf_t *buf) {                                \
+  init_mem_f(buf->data, buf->len);                                             \
+  buf->len = 0;                                                                \
+}
 
 #endif /* MADCROW_BUFFER_H_ */

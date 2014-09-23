@@ -9,6 +9,7 @@ madcrow_list(list,SizeList,size_t);
 
 #include "madcrow_buffer.h"
 madcrow_buffer(buf,SizeBuffer,size_t);
+madcrow_buffer_wipe(zbuf,ZeroSizeBuffer,size_t);
 
 #include "madcrow_linkedlist.h"
 madcrow_linkedlist(llist,LinkedList,LinkedNode,size_t);
