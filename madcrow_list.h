@@ -28,8 +28,8 @@
 //   void   clist_capacity(CharList *buf, size_t capacity)
 //   size_t clist_push    (CharList *buf, char obj)
 //   char   clist_pop     (CharList *buf)
-//   size_t clist_shift   (CharList *buf, char obj)
-//   char   clist_unshift (CharList *buf)
+//   size_t clist_unshift (CharList *buf, char obj)
+//   char   clist_shift   (CharList *buf)
 //   char*  clist_get     (CharList *buf, size_t idx)
 //   size_t clist_length  (const CharList *buf)
 //
@@ -46,6 +46,9 @@
   #define roundup2pow(x) (1UL << (64 - leading_zeros(x)))
 #endif
 
+#ifndef MC_MALLOC
+  #define MC_MALLOC(x,y)  malloc((x)*(y))
+#endif
 #ifndef MC_CALLOC
   #define MC_CALLOC  calloc
 #endif
@@ -80,9 +83,9 @@ static inline size_t FUNC ## _push(list_t *list, obj_t obj)                    \
  __attribute__((unused));                                                      \
 static inline obj_t  FUNC ## _pop(list_t *list)                                \
  __attribute__((unused));                                                      \
-static inline size_t FUNC ## _shift(list_t *list, obj_t obj)                   \
+static inline size_t FUNC ## _unshift(list_t *list, obj_t obj)                 \
  __attribute__((unused));                                                      \
-static inline obj_t  FUNC ## _unshift(list_t *list)                            \
+static inline obj_t  FUNC ## _shift(list_t *list)                              \
  __attribute__((unused));                                                      \
 static inline void FUNC ## _reset(list_t *list)                                \
  __attribute__((unused));                                                      \
@@ -104,7 +107,7 @@ static inline obj_t* FUNC ## _get(list_t *list, size_t idx) {                  \
                                                                                \
 static inline void FUNC ## _alloc(list_t *list, size_t capacity) {             \
   list->capacity = capacity < 8 ? 8 : roundup2pow(capacity);                   \
-  list->data = MC_CALLOC(list->capacity, sizeof(obj_t));                       \
+  list->data = MC_MALLOC(list->capacity, sizeof(obj_t));                       \
   list->start = list->end = list->capacity / 2;                                \
 }                                                                              \
                                                                                \
@@ -151,7 +154,7 @@ static inline obj_t  FUNC ## _pop(list_t *list) {                              \
 }                                                                              \
                                                                                \
 /* Add an element to the start of the list */                                  \
-static inline size_t FUNC ## _shift(list_t *list, obj_t obj) {                 \
+static inline size_t FUNC ## _unshift(list_t *list, obj_t obj) {               \
   madcrow_list_verify(list);                                                   \
   if(list->start == 0) {                                                       \
     size_t n = FUNC ## _length(list);                                          \
@@ -170,7 +173,7 @@ static inline size_t FUNC ## _shift(list_t *list, obj_t obj) {                 \
 }                                                                              \
                                                                                \
 /* Remove (and return) an element from the start of the list */                \
-static inline obj_t  FUNC ## _unshift(list_t *list) {                          \
+static inline obj_t  FUNC ## _shift(list_t *list) {                            \
   assert(list->start < list->end);                                             \
   madcrow_list_verify(list);                                                   \
   return list->data[list->start++];                                            \

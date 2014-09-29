@@ -44,24 +44,24 @@ static void test_list()
 
   assert(list_length(&alist) == 0);
 
-  list_shift(&alist, 1);
-  list_shift(&alist, 2);
-  list_shift(&alist, 3);
+  list_unshift(&alist, 1);
+  list_unshift(&alist, 2);
+  list_unshift(&alist, 3);
 
   assert(list_length(&alist) == 3);
 
-  list_unshift(&alist);
-  list_unshift(&alist);
-  list_unshift(&alist);
+  list_shift(&alist);
+  list_shift(&alist);
+  list_shift(&alist);
 
   assert(list_length(&alist) == 0);
 
   list_push(&alist, 14);
   list_push(&alist, 15);
   list_push(&alist, 16);
-  list_shift(&alist, 13);
-  list_shift(&alist, 12);
-  list_shift(&alist, 11);
+  list_unshift(&alist, 13);
+  list_unshift(&alist, 12);
+  list_unshift(&alist, 11);
 
   assert(list_length(&alist) == 6);
 
