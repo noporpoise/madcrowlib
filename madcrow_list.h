@@ -28,8 +28,10 @@
 //   void   clist_capacity(CharList *buf, size_t capacity)
 //   size_t clist_push    (CharList *buf, char obj)
 //   char   clist_pop     (CharList *buf)
+//   void   clist_popn    (CharList *buf, size_t n)
 //   size_t clist_unshift (CharList *buf, char obj)
 //   char   clist_shift   (CharList *buf)
+//   void   clist_shiftn  (CharList *buf, size_t n)
 //   char*  clist_get     (CharList *buf, size_t idx)
 //   size_t clist_length  (const CharList *buf)
 //
@@ -83,9 +85,13 @@ static inline size_t FUNC ## _push(list_t *list, obj_t obj)                    \
  __attribute__((unused));                                                      \
 static inline obj_t  FUNC ## _pop(list_t *list)                                \
  __attribute__((unused));                                                      \
+static inline void  FUNC ## _popn(list_t *list, size_t n)                      \
+ __attribute__((unused));                                                      \
 static inline size_t FUNC ## _unshift(list_t *list, obj_t obj)                 \
  __attribute__((unused));                                                      \
 static inline obj_t  FUNC ## _shift(list_t *list)                              \
+ __attribute__((unused));                                                      \
+static inline void  FUNC ## _shiftn(list_t *list, size_t n)                    \
  __attribute__((unused));                                                      \
 static inline void FUNC ## _reset(list_t *list)                                \
  __attribute__((unused));                                                      \
@@ -153,6 +159,12 @@ static inline obj_t  FUNC ## _pop(list_t *list) {                              \
   return list->data[--list->end];                                              \
 }                                                                              \
                                                                                \
+/* Remove n elements from the end of the list */                               \
+static inline void  FUNC ## _popn(list_t *list, size_t n) {                    \
+  assert(list->start+n <= list->end);                                          \
+  list->start += n;                                                            \
+}                                                                              \
+                                                                               \
 /* Add an element to the start of the list */                                  \
 static inline size_t FUNC ## _unshift(list_t *list, obj_t obj) {               \
   madcrow_list_verify(list);                                                   \
@@ -177,6 +189,12 @@ static inline obj_t  FUNC ## _shift(list_t *list) {                            \
   assert(list->start < list->end);                                             \
   madcrow_list_verify(list);                                                   \
   return list->data[list->start++];                                            \
+}                                                                              \
+                                                                               \
+/* Remove n elements from the start of the list */                             \
+static inline void  FUNC ## _shiftn(list_t *list, size_t n) {                  \
+  assert(list->start+n <= list->end);                                          \
+  list->end -= n;                                                              \
 }                                                                              \
                                                                                \
 static inline void FUNC ## _reset(list_t *list) {                              \

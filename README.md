@@ -69,8 +69,10 @@ Creates:
     void   clist_capacity(CharList *buf, size_t capacity)
     size_t clist_push    (CharList *buf, char obj)
     char   clist_pop     (CharList *buf)
-    size_t clist_shift   (CharList *buf, char obj)
-    char   clist_unshift (CharList *buf)
+    void   clist_popn    (CharList *buf, size_t n)
+    size_t clist_unshift (CharList *buf, char obj)
+    char   clist_shift   (CharList *buf)
+    void   clist_shiftn  (CharList *buf, size_t n)
     char*  clist_get     (CharList *buf, size_t idx)
     size_t clist_length  (const CharList *buf)
 
