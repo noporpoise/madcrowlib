@@ -162,7 +162,7 @@ static inline obj_t  FUNC ## _pop(list_t *list) {                              \
 /* Remove n elements from the end of the list */                               \
 static inline void  FUNC ## _popn(list_t *list, size_t n) {                    \
   assert(list->start+n <= list->end);                                          \
-  list->start += n;                                                            \
+  list->end -= n;                                                              \
 }                                                                              \
                                                                                \
 /* Add an element to the start of the list */                                  \
@@ -194,7 +194,7 @@ static inline obj_t  FUNC ## _shift(list_t *list) {                            \
 /* Remove n elements from the start of the list */                             \
 static inline void  FUNC ## _shiftn(list_t *list, size_t n) {                  \
   assert(list->start+n <= list->end);                                          \
-  list->end -= n;                                                              \
+  list->start += n;                                                            \
 }                                                                              \
                                                                                \
 static inline void FUNC ## _reset(list_t *list) {                              \
