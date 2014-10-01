@@ -139,11 +139,11 @@ static inline size_t FUNC ## _push(list_t *list, obj_t obj) {                  \
     size_t half = list->capacity / 2;                                          \
     if(n >= half) {                                                            \
       list->capacity *= 2;                                                     \
-      list->data = MC_REALLOC(list->data, list->capacity);                     \
+      list->data = MC_REALLOC(list->data, list->capacity * sizeof(obj_t));     \
     }                                                                          \
     else {                                                                     \
       size_t new_start = n; /* or = half - n */                                \
-      memmove(list->data + new_start, list->data + list->start, n);            \
+      memmove(list->data+new_start, list->data+list->start, n*sizeof(obj_t));  \
       list->start = new_start;                                                 \
       list->end = new_start + n;                                               \
     }                                                                          \
@@ -156,7 +156,7 @@ static inline size_t FUNC ## _push(list_t *list, obj_t obj) {                  \
 static inline obj_t  FUNC ## _pop(list_t *list) {                              \
   assert(list->end > list->start);                                             \
   madcrow_list_verify(list);                                                   \
-  return list->data[--list->end];                                              \
+  return list->data[--(list->end)];                                            \
 }                                                                              \
                                                                                \
 /* Remove n elements from the end of the list */                               \
@@ -173,14 +173,15 @@ static inline size_t FUNC ## _unshift(list_t *list, obj_t obj) {               \
     size_t half = list->capacity / 2;                                          \
     if(n >= half) {                                                            \
       list->capacity *= 2;                                                     \
-      list->data = MC_REALLOC(list->data, list->capacity);                     \
+      list->data = MC_REALLOC(list->data, list->capacity * sizeof(obj_t));     \
     }                                                                          \
     size_t new_start = list->capacity - (2*n); /* or = half */                 \
-    memmove(list->data + new_start, list->data + list->start, n);              \
+    memmove(list->data+new_start, list->data+list->start, n*sizeof(obj_t));    \
     list->start = new_start;                                                   \
     list->end = new_start + n;                                                 \
   }                                                                            \
-  list->data[--list->start] = obj;                                             \
+  assert(list->start > 0);                                                     \
+  list->data[--(list->start)] = obj;                                           \
   return 0;                                                                    \
 }                                                                              \
                                                                                \
