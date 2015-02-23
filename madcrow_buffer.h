@@ -31,6 +31,7 @@
 //   void    charbuf_append      (String *buf, char *obj, size_t n)
 //   void    charbuf_shift_left  (String *buf, size_t n)
 //   void    charbuf_shift_right (String *buf, size_t n)
+//   void    charbuf_copy        (String *dst, const String *src)
 //
 //  String string = madcrow_buffer_init;
 //  madcrow_buffer_verify(&string);
@@ -67,7 +68,7 @@
 #define MC_INIT_MEM_UNDEF(arr,n)
 
 #define madcrow_buffer(FUNC,buf_t,obj_t) \
-        madcrow_buffer2(FUNC,buf_t,obj_t,MC_MALLOC,MC_INIT_MEM_UNDEF)
+        madcrow_buffer2(FUNC,buf_t,obj_t,MC_CALLOC,MC_INIT_MEM_UNDEF)
 
 #define madcrow_buffer_wipe(FUNC,buf_t,obj_t) \
         madcrow_buffer2(FUNC,buf_t,obj_t,MC_CALLOC,MC_INIT_MEM_WIPE)
@@ -100,6 +101,10 @@ static inline void FUNC ## _shift_left(buf_t *buf, size_t nel)                 \
 static inline void FUNC ## _shift_right(buf_t *buf, size_t nel)                \
  __attribute__((unused));                                                      \
 static inline void FUNC ## _remove(buf_t *buf, size_t n)                       \
+ __attribute__((unused));                                                      \
+static inline void FUNC ## _copy(buf_t *dst, const buf_t *src)                 \
+ __attribute__((unused));                                                      \
+static inline void FUNC ## _extend(buf_t *buf, size_t len)                     \
  __attribute__((unused));                                                      \
                                                                                \
                                                                                \
@@ -170,6 +175,17 @@ static inline void FUNC ## _remove(buf_t *buf, size_t n) {                     \
 static inline void FUNC ## _reset(buf_t *buf) {                                \
   init_mem_f(buf->data, buf->len);                                             \
   buf->len = 0;                                                                \
-}
+}                                                                              \
+                                                                               \
+static inline void FUNC ## _copy(buf_t *dst, const buf_t *src) {               \
+  FUNC ## _capacity(dst, src->len);                                            \
+  memcpy(dst->data, src->data, sizeof(obj_t) * src->len);                      \
+  dst->len = src->len;                                                         \
+}                                                                              \
+                                                                               \
+static inline void FUNC ## _extend(buf_t *buf, size_t len) {                   \
+  FUNC ## _capacity(buf, len);                                                 \
+  if(buf->len < len) buf->len = len;                                           \
+}                                                                              \
 
 #endif /* MADCROW_BUFFER_H_ */
