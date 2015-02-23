@@ -113,7 +113,7 @@ static inline obj_t* FUNC ## _get(list_t *list, size_t idx) {                  \
                                                                                \
 static inline void FUNC ## _alloc(list_t *list, size_t capacity) {             \
   list->capacity = capacity < 8 ? 8 : roundup2pow(capacity);                   \
-  list->data = MC_MALLOC(list->capacity, sizeof(obj_t));                       \
+  list->data = MC_CALLOC(list->capacity, sizeof(obj_t));                       \
   list->start = list->end = list->capacity / 2;                                \
 }                                                                              \
                                                                                \

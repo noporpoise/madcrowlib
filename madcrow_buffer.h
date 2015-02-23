@@ -68,7 +68,7 @@
 #define MC_INIT_MEM_UNDEF(arr,n)
 
 #define madcrow_buffer(FUNC,buf_t,obj_t) \
-        madcrow_buffer2(FUNC,buf_t,obj_t,MC_MALLOC,MC_INIT_MEM_UNDEF)
+        madcrow_buffer2(FUNC,buf_t,obj_t,MC_CALLOC,MC_INIT_MEM_UNDEF)
 
 #define madcrow_buffer_wipe(FUNC,buf_t,obj_t) \
         madcrow_buffer2(FUNC,buf_t,obj_t,MC_CALLOC,MC_INIT_MEM_WIPE)
