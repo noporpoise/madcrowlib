@@ -13,7 +13,7 @@
 // Example:
 //
 //   #include "madcrow_buffer.h"
-//   madcrow_buffer_create(charbuf,String,char)
+//   madcrow_buffer(charbuf,String,char)
 //
 // Creates:
 //
@@ -27,11 +27,21 @@
 //   void    charbuf_reset       (String *buf)
 //   void    charbuf_capacity    (String *buf, size_t capacity)
 //   size_t  charbuf_add         (String *buf, char obj)
+//   size_t  charbuf_push        (String *buf, char obj)
+//   char    charbuf_pop         (String *buf)
+//   char    charbuf_get         (String *buf, size_t idx)
+//   void    charbuf_set         (String *buf, size_t idx, obj_t obj)
 //   ssize_t charbuf_attempt_add (String *buf, char obj)
-//   void    charbuf_append      (String *buf, char *obj, size_t n)
+//   size_t  charbuf_append      (String *buf, const char *obj, size_t n)
+//   size_t  charbuf_append_n    (String *buf, char obj, size_t n)
 //   void    charbuf_shift_left  (String *buf, size_t n)
 //   void    charbuf_shift_right (String *buf, size_t n)
+//   void    charbuf_remove      (String *buf, size_t n)
 //   void    charbuf_copy        (String *dst, const String *src)
+//   void    charbuf_extend      (String *buf, size_t n)
+//
+// _push is _add
+// _pop is _remove
 //
 //  String string = madcrow_buffer_init;
 //  madcrow_buffer_verify(&string);
@@ -90,9 +100,19 @@ static inline void FUNC ## _capacity(buf_t *buf, size_t cap)                   \
  __attribute__((unused));                                                      \
 static inline size_t FUNC ## _add(buf_t *buf, obj_t obj)                       \
  __attribute__((unused));                                                      \
+static inline size_t FUNC ## _push(buf_t *buf, obj_t obj)                      \
+ __attribute__((unused));                                                      \
+static inline obj_t FUNC ## _pop(buf_t *buf)                                   \
+ __attribute__((unused));                                                      \
+static inline obj_t FUNC ## _get(buf_t *buf, size_t idx)                       \
+ __attribute__((unused));                                                      \
+static inline void FUNC ## _set(buf_t *buf, size_t idx, obj_t obj)             \
+ __attribute__((unused));                                                      \
 static inline ssize_t FUNC ## _attempt_add(buf_t *buf, obj_t obj)              \
  __attribute__((unused));                                                      \
 static inline size_t FUNC ## _append(buf_t *buf, const obj_t *obj, size_t n)   \
+ __attribute__((unused));                                                      \
+static inline size_t FUNC ## _append_n(buf_t *buf, obj_t obj, size_t n)        \
  __attribute__((unused));                                                      \
 static inline void FUNC ## _reset(buf_t *buf)                                  \
  __attribute__((unused));                                                      \
@@ -135,6 +155,35 @@ static inline size_t FUNC ## _add(buf_t *buf, obj_t obj) {                     \
   return buf->len++;                                                           \
 }                                                                              \
                                                                                \
+/* Wrapper for _add */                                                         \
+static inline size_t FUNC ## _push(buf_t *buf, obj_t obj)                      \
+{                                                                              \
+  return FUNC ## _add(buf, obj);                                               \
+}                                                                              \
+                                                                               \
+/* Remove and return last element */                                           \
+static inline obj_t FUNC ## _pop(buf_t *buf)                                   \
+{                                                                              \
+  assert(buf->len > 0);                                                        \
+  obj_t tmp = buf->data[--buf->len];                                           \
+  init_mem_f(buf->data+buf->len, 1);                                           \
+  return tmp;                                                                  \
+}                                                                              \
+                                                                               \
+/* Fetch a given element */                                                    \
+static inline obj_t FUNC ## _get(buf_t *buf, size_t idx)                       \
+{                                                                              \
+  assert(idx < buf->len);                                                      \
+  return buf->data[idx];                                                       \
+}                                                                              \
+                                                                               \
+/* Set a given element */                                                      \
+static inline void FUNC ## _set(buf_t *buf, size_t idx, obj_t obj)             \
+{                                                                              \
+  assert(idx < buf->len);                                                      \
+  buf->data[idx] = obj;                                                        \
+}                                                                              \
+                                                                               \
 /* Returns index or -1 on failure */                                           \
 static inline ssize_t FUNC ## _attempt_add(buf_t *buf, obj_t obj) {            \
   if(buf->len >= buf->capacity) return -1;                                     \
@@ -148,6 +197,14 @@ static inline size_t FUNC ## _append(buf_t *buf, const obj_t *obj, size_t n) { \
   memcpy(buf->data+buf->len, obj, n*sizeof(obj_t));                            \
   size_t idx = buf->len;                                                       \
   buf->len += n;                                                               \
+  return idx;                                                                  \
+}                                                                              \
+                                                                               \
+/* Returns index of first new object in buffer */                              \
+static inline size_t FUNC ## _append_n(buf_t *buf, obj_t obj, size_t n) {      \
+  size_t i, idx = buf->len, end = buf->len+n;                                  \
+  FUNC ## _capacity(buf, end);                                                 \
+  for(i = buf->len; i < end; i++) { buf->data[i] = obj; }                      \
   return idx;                                                                  \
 }                                                                              \
                                                                                \
