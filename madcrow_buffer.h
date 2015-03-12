@@ -181,7 +181,7 @@ static inline obj_t FUNC ## _get(buf_t *buf, size_t idx)                       \
 static inline void FUNC ## _set(buf_t *buf, size_t idx, obj_t obj)             \
 {                                                                              \
   assert(idx < buf->len);                                                      \
-  buf->data[idx] = obj;                                                        \
+  memcpy(&buf->data[idx], &obj, sizeof(obj_t));                                \
 }                                                                              \
                                                                                \
 /* Returns index or -1 on failure */                                           \
@@ -204,7 +204,7 @@ static inline size_t FUNC ## _append(buf_t *buf, const obj_t *obj, size_t n) { \
 static inline size_t FUNC ## _append_n(buf_t *buf, obj_t obj, size_t n) {      \
   size_t i, idx = buf->len, end = buf->len+n;                                  \
   FUNC ## _capacity(buf, end);                                                 \
-  for(i = buf->len; i < end; i++) { buf->data[i] = obj; }                      \
+  for(i = buf->len; i < end; i++) { memcpy(buf->data+i, &obj, sizeof(obj_t)); }\
   return idx;                                                                  \
 }                                                                              \
                                                                                \
