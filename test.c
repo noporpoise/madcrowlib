@@ -21,7 +21,7 @@ static void test_buffer()
   buf_alloc(&abuf, 8);
 
   for(i = 0; i < 100; i++) assert(i == buf_add(&abuf, i));
-  for(i = 0; i < 100; i++) assert(abuf.data[i] == i);
+  for(i = 0; i < 100; i++) assert(abuf.b[i] == i);
 
   buf_dealloc(&abuf);
 }
