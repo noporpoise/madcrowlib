@@ -221,7 +221,7 @@ static inline size_t FUNC ## _len(const buf_t *buf) {                          \
 /* Returns index of new object in buffer */                                    \
 static inline size_t FUNC ## _add(buf_t *buf, obj_t obj) {                     \
   FUNC ## _capacity(buf, buf->len+1);                                          \
-  memmove(buf->b+buf->len, &obj, sizeof(obj));                                 \
+  memcpy(buf->b+buf->len, &obj, sizeof(obj));                                  \
   return buf->len++;                                                           \
 }                                                                              \
                                                                                \
