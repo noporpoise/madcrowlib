@@ -32,40 +32,40 @@ static void test_list()
   SizeList alist;
   list_alloc(&alist, 8);
 
-  list_push(&alist, 1);
-  list_push(&alist, 2);
-  list_push(&alist, 3);
+  list_append(&alist, 1);
+  list_append(&alist, 2);
+  list_append(&alist, 3);
 
-  assert(list_length(&alist) == 3);
+  assert(list_len(&alist) == 3);
 
-  list_pop(&alist);
-  list_pop(&alist);
-  list_pop(&alist);
+  list_pop(&alist, NULL, 1);
+  list_pop(&alist, NULL, 1);
+  list_pop(&alist, NULL, 1);
 
-  assert(list_length(&alist) == 0);
+  assert(list_len(&alist) == 0);
 
-  list_unshift(&alist, 1);
-  list_unshift(&alist, 2);
-  list_unshift(&alist, 3);
+  list_prepend(&alist, 1);
+  list_prepend(&alist, 2);
+  list_prepend(&alist, 3);
 
-  assert(list_length(&alist) == 3);
+  assert(list_len(&alist) == 3);
 
-  list_shift(&alist);
-  list_shift(&alist);
-  list_shift(&alist);
+  list_shift(&alist, NULL, 1);
+  list_shift(&alist, NULL, 1);
+  list_shift(&alist, NULL, 1);
 
-  assert(list_length(&alist) == 0);
+  assert(list_len(&alist) == 0);
 
-  list_push(&alist, 14);
-  list_push(&alist, 15);
-  list_push(&alist, 16);
-  list_unshift(&alist, 13);
-  list_unshift(&alist, 12);
-  list_unshift(&alist, 11);
+  list_append(&alist, 14);
+  list_append(&alist, 15);
+  list_append(&alist, 16);
+  list_prepend(&alist, 13);
+  list_prepend(&alist, 12);
+  list_prepend(&alist, 11);
 
-  assert(list_length(&alist) == 6);
+  assert(list_len(&alist) == 6);
 
-  for(i = 0; i < 6; i++) assert(*list_get(&alist, i) == i+11);
+  for(i = 0; i < 6; i++) assert(list_get(&alist, i) == i+11);
 
   list_dealloc(&alist);
 }

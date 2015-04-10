@@ -43,20 +43,19 @@
 //
 //   size_t  charbuf_push        (String *buf, char const *ptr, size_t n)
 //   void    charbuf_pop         (String *buf, char *ptr, size_t n)
-//   void    charbuf_popn        (String *buf, size_t n)
 //   void    charbuf_unshift     (String *buf, char const *ptr, size_t n)
 //   void    charbuf_shift       (String *buf, char *ptr, size_t n)
-//   void    charbuf_shiftn      (String *buf, size_t n)
-//
-//   ssize_t charbuf_push_try    (String *buf, char const *ptr, size_t n)
-//   size_t  charbuf_push_rpt    (String *buf, char const *obj, size_t n)
-//   ssize_t charbuf_unshift_try (String *buf, char const *ptr, size_t n)
-//   void    charbuf_unshift_rpt (String *buf, char const *obj, size_t n)
-//   size_t  charbuf_push_zero   (String *buf, size_t n)
-//   void    charbuf_unshift_zero(String *buf, size_t n)
 //
 //   void    charbuf_copy        (String *dst, const String *src)
 //   void    charbuf_resize      (String *buf, size_t n)
+//
+// There need to be removed:
+//   ssize_t charbuf_push_try    (String *buf, char const *ptr, size_t n)
+//   size_t  charbuf_push_rpt    (String *buf, char const *obj, size_t n)
+//   size_t  charbuf_push_zero   (String *buf, size_t n)
+//   ssize_t charbuf_unshift_try (String *buf, char const *ptr, size_t n)
+//   void    charbuf_unshift_rpt (String *buf, char const *obj, size_t n)
+//   void    charbuf_unshift_zero(String *buf, size_t n)
 //
 //  String string;
 //  char_buf_alloc(&string, 1024);
@@ -73,17 +72,6 @@
   #define roundup2pow(x) (1UL << (64 - leading_zeros(x)))
 #endif
 
-#ifndef MC_MALLOC
-  #define MC_MALLOC(x,y)  malloc((x)*(y))
-#endif
-#ifndef MC_CALLOC
-  #define MC_CALLOC  calloc
-#endif
-#ifndef MC_REALLOC
-  #define MC_REALLOC realloc
-#endif
-
-
 #define madcrow_buffer_init {.b = NULL, .len = 0, .capacity = 0}
 
 #define madcrow_buffer_verify(buf) do {                                        \
@@ -95,13 +83,13 @@
 #define MC_INIT_MEM_UNDEF(arr,n)
 
 #define madcrow_buffer(FUNC,buf_t,obj_t) \
-        madcrow_buffer2(FUNC,buf_t,obj_t,MC_CALLOC,MC_INIT_MEM_UNDEF)
+        madcrow_buffer2(FUNC,buf_t,obj_t,calloc,realloc,free,MC_INIT_MEM_UNDEF)
 
 #define madcrow_buffer_wipe(FUNC,buf_t,obj_t) \
-        madcrow_buffer2(FUNC,buf_t,obj_t,MC_CALLOC,MC_INIT_MEM_WIPE)
+        madcrow_buffer2(FUNC,buf_t,obj_t,calloc,realloc,free,MC_INIT_MEM_WIPE)
 
 // init_mem_f is one of MC_INIT_MEM_WIPE or MC_INIT_MEM_UNDEF
-#define madcrow_buffer2(FUNC,buf_t,obj_t,alloc,init_mem_f)                     \
+#define madcrow_buffer2(FUNC,buf_t,obj_t,mc_alloc,mc_realloc,mc_free,init_mem_f)\
                                                                                \
 typedef struct {                                                               \
   obj_t *b;                                                                    \
@@ -111,69 +99,66 @@ typedef struct {                                                               \
 /* Define functions with unused attribute in case they're not used */          \
 static inline buf_t* FUNC ## _new(size_t capacity)                             \
  __attribute__((unused));                                                      \
-static inline void FUNC ## _destroy(buf_t *buf)                                \
+static inline void   FUNC ## _destroy(buf_t *buf)                              \
  __attribute__((unused));                                                      \
-static inline void FUNC ## _alloc(buf_t *buf, size_t capacity)                 \
+static inline void   FUNC ## _alloc(buf_t *buf, size_t capacity)               \
  __attribute__((unused));                                                      \
-static inline void FUNC ## _dealloc(buf_t *buf)                                \
+static inline void   FUNC ## _dealloc(buf_t *buf)                              \
  __attribute__((unused));                                                      \
-static inline void FUNC ## _reset(buf_t *buf)                                  \
+static inline void   FUNC ## _reset(buf_t *buf)                                \
  __attribute__((unused));                                                      \
-static inline void FUNC ## _capacity(buf_t *buf, size_t cap)                   \
+static inline void   FUNC ## _capacity(buf_t *buf, size_t cap)                 \
  __attribute__((unused));                                                      \
 static inline size_t FUNC ## _len(const buf_t *buf)                            \
  __attribute__((unused));                                                      \
 \
 static inline size_t FUNC ## _add(buf_t *buf, obj_t obj)                       \
  __attribute__((unused));                                                      \
-static inline obj_t FUNC ## _remove(buf_t *buf)                                \
+static inline obj_t  FUNC ## _remove(buf_t *buf)                               \
  __attribute__((unused));                                                      \
-static inline obj_t FUNC ## _get(buf_t *buf, size_t idx)                       \
+static inline obj_t  FUNC ## _get(buf_t *buf, size_t idx)                      \
  __attribute__((unused));                                                      \
-static inline void FUNC ## _set(buf_t *buf, size_t idx, obj_t obj)             \
+static inline void   FUNC ## _set(buf_t *buf, size_t idx, obj_t obj)           \
  __attribute__((unused));                                                      \
 \
-static inline void FUNC ## _getn(buf_t *buf, size_t idx, obj_t *ptr, size_t n) \
+static inline void   FUNC ## _getn(buf_t *buf, size_t idx, obj_t *ptr, size_t n)\
  __attribute__((unused));                                                      \
-static inline void FUNC ## _setn(buf_t *buf, size_t idx,                       \
-                                 obj_t const *ptr, size_t n)                   \
+static inline void   FUNC ## _setn(buf_t *buf, size_t idx,                     \
+                                   obj_t const *ptr, size_t n)                 \
  __attribute__((unused));                                                      \
 \
 static inline size_t FUNC ## _push(buf_t *buf, obj_t const *ptr, size_t n)     \
  __attribute__((unused));                                                      \
 static inline void FUNC ## _pop(buf_t *buf, obj_t *ptr, size_t n)              \
  __attribute__((unused));                                                      \
-static inline void FUNC ## _popn(buf_t *buf, size_t n)                         \
+\
+static inline void   FUNC ## _unshift(buf_t *buf, obj_t const *ptr, size_t n)  \
+ __attribute__((unused));                                                      \
+static inline void   FUNC ## _shift(buf_t *buf, obj_t *ptr, size_t n)          \
  __attribute__((unused));                                                      \
 \
-static inline void FUNC ## _unshift(buf_t *buf, obj_t const *ptr, size_t n)    \
- __attribute__((unused));                                                      \
-static inline void FUNC ## _shift(buf_t *buf, obj_t *ptr, size_t n)            \
- __attribute__((unused));                                                      \
-static inline void FUNC ## _shiftn(buf_t *buf, size_t n)                       \
- __attribute__((unused));                                                      \
-\
+/* Potentially removing these: */ \
 static inline ssize_t FUNC ## _push_try(buf_t *buf, obj_t const *ptr, size_t n)\
  __attribute__((unused));                                                      \
 static inline size_t FUNC ## _push_rpt(buf_t *buf, obj_t const *obj, size_t n) \
  __attribute__((unused));                                                      \
 static inline ssize_t FUNC ## _unshift_try(buf_t *buf, obj_t const *ptr, size_t n)\
  __attribute__((unused));                                                      \
-static inline void FUNC ## _unshift_rpt(buf_t *buf, obj_t const *obj, size_t n)\
+static inline void   FUNC ## _unshift_rpt(buf_t *buf, obj_t const *obj, size_t n)\
  __attribute__((unused));                                                      \
 static inline size_t FUNC ## _push_zero(buf_t *buf, size_t n)                  \
  __attribute__((unused));                                                      \
-static inline void FUNC ## _unshift_zero(buf_t *buf, size_t n)                 \
+static inline void   FUNC ## _unshift_zero(buf_t *buf, size_t n)               \
  __attribute__((unused));                                                      \
 \
-static inline void FUNC ## _copy(buf_t *dst, const buf_t *src)                 \
+static inline void   FUNC ## _copy(buf_t *dst, const buf_t *src)               \
  __attribute__((unused));                                                      \
-static inline void FUNC ## _resize(buf_t *buf, size_t len)                     \
+static inline void   FUNC ## _resize(buf_t *buf, size_t len)                   \
  __attribute__((unused));                                                      \
                                                                                \
 static inline buf_t* FUNC ## _new(size_t capacity)                             \
 {                                                                              \
-  buf_t *buf = alloc(1, sizeof(buf_t));                                        \
+  buf_t *buf = mc_alloc(1, sizeof(buf_t));                                     \
   if(buf) FUNC ## _alloc(buf, capacity);                                       \
   return buf;                                                                  \
 }                                                                              \
@@ -181,17 +166,17 @@ static inline buf_t* FUNC ## _new(size_t capacity)                             \
 static inline void FUNC ## _destroy(buf_t *buf)                                \
 {                                                                              \
   FUNC ## _dealloc(buf);                                                       \
-  free(buf);                                                                   \
+  mc_free(buf);                                                                \
 }                                                                              \
                                                                                \
 static inline void FUNC ## _alloc(buf_t *buf, size_t capacity) {               \
   buf->size = capacity;                                                        \
-  buf->b = alloc(buf->size, sizeof(obj_t));                                    \
+  buf->b = mc_alloc(buf->size, sizeof(obj_t));                                 \
   buf->len = 0;                                                                \
 }                                                                              \
                                                                                \
 static inline void FUNC ## _dealloc(buf_t *buf) {                              \
-  free(buf->b);                                                                \
+  mc_free(buf->b);                                                             \
   memset(buf, 0, sizeof(buf_t));                                               \
 }                                                                              \
                                                                                \
@@ -203,7 +188,7 @@ static inline void FUNC ## _reset(buf_t *buf) {                                \
 static inline void FUNC ## _capacity(buf_t *buf, size_t cap) {                 \
   if(cap > buf->size) {                                                        \
     cap = roundup2pow(cap);                                                    \
-    buf->b = MC_REALLOC(buf->b, cap * sizeof(obj_t));                          \
+    buf->b = mc_realloc(buf->b, cap * sizeof(obj_t));                          \
     init_mem_f(buf->b + buf->size, cap - buf->size);                           \
     buf->size = cap;                                                           \
   }                                                                            \
@@ -235,14 +220,14 @@ static inline obj_t FUNC ## _remove(buf_t *buf)                                \
 }                                                                              \
                                                                                \
 /* Fetch a given element */                                                    \
-static inline obj_t FUNC ## _get(buf_t *buf, size_t idx)                       \
+static inline obj_t  FUNC ## _get(buf_t *buf, size_t idx)                      \
 {                                                                              \
   assert(idx < buf->len);                                                      \
   return buf->b[idx];                                                          \
 }                                                                              \
                                                                                \
 /* Set a given element */                                                      \
-static inline void FUNC ## _set(buf_t *buf, size_t idx, obj_t obj)             \
+static inline void   FUNC ## _set(buf_t *buf, size_t idx, obj_t obj)           \
 {                                                                              \
   assert(idx < buf->len);                                                      \
   memmove(&buf->b[idx], &obj, sizeof(obj_t));                                  \
@@ -253,15 +238,15 @@ static inline void FUNC ## _set(buf_t *buf, size_t idx, obj_t obj)             \
 /*                                                   */                        \
                                                                                \
 /* Fetch a given element */                                                    \
-static inline void FUNC ## _getn(buf_t *buf, size_t idx, obj_t *ptr, size_t n) \
+static inline void   FUNC ## _getn(buf_t *buf, size_t idx, obj_t *ptr, size_t n)\
 {                                                                              \
   assert(idx < buf->len);                                                      \
   memmove(ptr, buf->b+idx, n * sizeof(obj_t));                                 \
 }                                                                              \
                                                                                \
 /* Set a given element */                                                      \
-static inline void FUNC ## _setn(buf_t *buf, size_t idx,                       \
-                                 obj_t const *ptr, size_t n)                   \
+static inline void   FUNC ## _setn(buf_t *buf, size_t idx,                     \
+                                   obj_t const *ptr, size_t n)                 \
 {                                                                              \
   assert(idx < buf->len);                                                      \
   memmove(buf->b+idx, ptr, n * sizeof(obj_t));                                 \
@@ -279,24 +264,17 @@ static inline size_t FUNC ## _push(buf_t *buf, obj_t const *ptr, size_t n)     \
 }                                                                              \
                                                                                \
 /* Remove and return last n elements */                                        \
-static inline void FUNC ## _pop(buf_t *buf, obj_t *ptr, size_t n)              \
+/* @param ptr if != NULL, removed elements are copied to ptr */                \
+static inline void   FUNC ## _pop(buf_t *buf, obj_t *ptr, size_t n)            \
 {                                                                              \
   assert(buf->len > n);                                                        \
   buf->len -= n;                                                               \
-  memmove(ptr, buf->b+buf->len, n * sizeof(obj_t));                            \
-  init_mem_f(buf->b+buf->len, n);                                              \
-}                                                                              \
-                                                                               \
-/* Remove and return last n elements */                                        \
-static inline void FUNC ## _popn(buf_t *buf, size_t n)                         \
-{                                                                              \
-  assert(buf->len > n);                                                        \
-  buf->len -= n;                                                               \
+  if(ptr) memmove(ptr, buf->b+buf->len, n * sizeof(obj_t));                    \
   init_mem_f(buf->b+buf->len, n);                                              \
 }                                                                              \
                                                                                \
 /* Add items to the start of a buffer */                                       \
-static inline void FUNC ## _unshift(buf_t *buf, obj_t const *ptr, size_t n)    \
+static inline void   FUNC ## _unshift(buf_t *buf, obj_t const *ptr, size_t n)  \
 {                                                                              \
   FUNC ## _capacity(buf, buf->len+n);                                          \
   memmove(buf->b+n, buf->b, buf->len * sizeof(obj_t));                         \
@@ -305,20 +283,13 @@ static inline void FUNC ## _unshift(buf_t *buf, obj_t const *ptr, size_t n)    \
 }                                                                              \
                                                                                \
 /* Remove and return items to the start of a buffer */                         \
-static inline void FUNC ## _shift(buf_t *buf, obj_t *ptr, size_t n)            \
+/* @param ptr if != NULL, removed elements are copied to ptr */                \
+static inline void   FUNC ## _shift(buf_t *buf, obj_t *ptr, size_t n)          \
 {                                                                              \
   assert(n <= buf->len);                                                       \
   buf->len -= n;                                                               \
-  memmove(ptr,    buf->b,   n        * sizeof(obj_t));                         \
+  if(ptr) memmove(ptr, buf->b, n * sizeof(obj_t));                             \
   memmove(buf->b, buf->b+n, buf->len * sizeof(obj_t));                         \
-  init_mem_f(buf->b+buf->len, n);                                              \
-}                                                                              \
-                                                                               \
-/* Remove items to the start of a buffer */                                    \
-static inline void FUNC ## _shiftn(buf_t *buf, size_t n)                       \
-{                                                                              \
-  assert(n <= buf->len);                                                       \
-  buf->len -= n;                                                               \
   init_mem_f(buf->b+buf->len, n);                                              \
 }                                                                              \
                                                                                \
@@ -354,7 +325,7 @@ static inline ssize_t FUNC ## _unshift_try(buf_t *buf, obj_t const *ptr, size_t 
 }                                                                              \
                                                                                \
 /* Add the same item to the start of the array n times */                      \
-static inline void FUNC ## _unshift_rpt(buf_t *buf, obj_t const *obj, size_t n)\
+static inline void   FUNC ## _unshift_rpt(buf_t *buf, obj_t const *obj, size_t n)\
 {                                                                              \
   size_t i;                                                                    \
   FUNC ## _capacity(buf, buf->len+n);                                          \
@@ -374,7 +345,7 @@ static inline size_t FUNC ## _push_zero(buf_t *buf, size_t n)                  \
 }                                                                              \
                                                                                \
 /* Add a zero'd item to the start of the array n times */                      \
-static inline void FUNC ## _unshift_zero(buf_t *buf, size_t n)                 \
+static inline void   FUNC ## _unshift_zero(buf_t *buf, size_t n)               \
 {                                                                              \
   FUNC ## _capacity(buf, buf->len+n);                                          \
   memmove(buf->b+n, buf->b, buf->len*sizeof(obj_t));                           \
@@ -383,13 +354,13 @@ static inline void FUNC ## _unshift_zero(buf_t *buf, size_t n)                 \
 }                                                                              \
                                                                                \
                                                                                \
-static inline void FUNC ## _copy(buf_t *dst, const buf_t *src) {               \
+static inline void   FUNC ## _copy(buf_t *dst, const buf_t *src) {             \
   FUNC ## _capacity(dst, src->len);                                            \
   memmove(dst->b, src->b, sizeof(obj_t) * src->len);                           \
   dst->len = src->len;                                                         \
 }                                                                              \
                                                                                \
-static inline void FUNC ## _resize(buf_t *buf, size_t len) {                   \
+static inline void   FUNC ## _resize(buf_t *buf, size_t len) {                 \
   FUNC ## _capacity(buf, len);                                                 \
   if(buf->len < len) buf->len = len;                                           \
 }                                                                              \
