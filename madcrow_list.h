@@ -18,7 +18,7 @@
 // Creates:
 //
 //   typedef struct {
-//     char *data;
+//     char *b;
 //     size_t start, end, capacity;
 //   } CharList;
 //
@@ -42,6 +42,7 @@
 //   void       clist_getn    (CharList *list, size_t idx, char *ptr, size_t n)
 //   void       clist_setn    (CharList *list, size_t idx,
 //                             char const *ptr, size_t n)
+//   char*     clist_getptr   (CharList *list, size_t idx)
 //
 //   size_t     clist_push    (CharList *list, char const *ptr, size_t n)
 //   void       clist_pop     (CharList *list, char *ptr, size_t n)
@@ -63,12 +64,12 @@
   #define roundup2pow(x) (1UL << (64 - leading_zeros(x)))
 #endif
 
-#define madcrow_list_init {.data = NULL, .start = 0, .end = 0, .capacity = 0}
+#define madcrow_list_init {.b = NULL, .start = 0, .end = 0, .capacity = 0}
 
 #define madcrow_list_verify(list) do {                                         \
   assert(list->start <= list->end);                                            \
   assert(list->end <= list->capacity);                                         \
-  assert(list->capacity == 0 || list->data != NULL);                           \
+  assert(list->capacity == 0 || list->b != NULL);                              \
 } while(0)
 
 #define madcrow_list(name,list_t,obj_t) \
@@ -77,7 +78,7 @@
 #define madcrow_list2(FUNC,list_t,obj_t,mc_alloc,mc_realloc,mc_free)           \
                                                                                \
 typedef struct {                                                               \
-  obj_t *data;                                                                 \
+  obj_t *b;                                                                    \
   size_t start, end, capacity;                                                 \
 } list_t;                                                                      \
                                                                                \
@@ -109,6 +110,8 @@ static inline size_t  FUNC ## _len(const list_t *list)                         \
 static inline obj_t   FUNC ## _get(list_t *list, size_t idx)                   \
  __attribute__((unused));                                                      \
 static inline void    FUNC ## _set(list_t *list, size_t idx, obj_t obj)        \
+ __attribute__((unused));                                                      \
+static inline obj_t*   FUNC ## _getptr(list_t *list, size_t idx)               \
  __attribute__((unused));                                                      \
 \
 static inline size_t  FUNC ## _prepend(list_t *list, obj_t obj)                \
@@ -145,24 +148,30 @@ static inline size_t  FUNC ## _len(const list_t *list) {                       \
 static inline obj_t   FUNC ## _get(list_t *list, size_t idx) {                 \
   madcrow_list_verify(list);                                                   \
   assert(idx < list->end - list->start);                                       \
-  return list->data[list->start + idx];                                        \
+  return list->b[list->start + idx];                                           \
+}                                                                              \
+                                                                               \
+static inline obj_t*  FUNC ## _getptr(list_t *list, size_t idx) {              \
+  madcrow_list_verify(list);                                                   \
+  assert(idx < list->end - list->start);                                       \
+  return list->b + list->start + idx;                                          \
 }                                                                              \
                                                                                \
 static inline void    FUNC ## _set(list_t *list, size_t idx, obj_t obj) {      \
   madcrow_list_verify(list);                                                   \
   assert(idx < list->end - list->start);                                       \
-  list->data[list->start + idx] = obj;                                         \
+  list->b[list->start + idx] = obj;                                            \
 }                                                                              \
                                                                                \
 static inline void    FUNC ## _alloc(list_t *list, size_t capacity) {          \
   list->capacity = capacity < 8 ? 8 : roundup2pow(capacity);                   \
-  list->data = mc_alloc(list->capacity, sizeof(obj_t));                        \
+  list->b = mc_alloc(list->capacity, sizeof(obj_t));                           \
   list->start = list->end = list->capacity / 2;                                \
 }                                                                              \
                                                                                \
 static inline void    FUNC ## _dealloc(list_t *list) {                         \
   madcrow_list_verify(list);                                                   \
-  mc_free(list->data);                                                         \
+  mc_free(list->b);                                                            \
   memset(list, 0, sizeof(list_t));                                             \
 }                                                                              \
                                                                                \
@@ -170,7 +179,7 @@ static inline void    FUNC ## _capacity(list_t *list, size_t cap) {            \
   madcrow_list_verify(list);                                                   \
   if(cap > list->capacity) {                                                   \
     cap = roundup2pow(cap);                                                    \
-    list->data = mc_realloc(list->data, list->capacity * sizeof(obj_t));       \
+    list->b = mc_realloc(list->b, list->capacity * sizeof(obj_t));             \
     list->capacity = cap;                                                      \
   }                                                                            \
 }                                                                              \
@@ -182,17 +191,17 @@ static inline size_t  FUNC ## _push(list_t *list, const obj_t *ptr, size_t n) {\
     size_t oldlen = FUNC ## _len(list), newlen = oldlen + n;                   \
     if(newlen >= list->capacity / 2) {                                         \
       list->capacity = roundup2pow(list->start + newlen);                      \
-      list->data = mc_realloc(list->data, list->capacity * sizeof(obj_t));     \
+      list->b = mc_realloc(list->b, list->capacity * sizeof(obj_t));           \
     }                                                                          \
     else {                                                                     \
       size_t new_start = (list->capacity - newlen) / 2;                        \
-      memmove(list->data+new_start, list->data+list->start, oldlen*sizeof(obj_t)); \
+      memmove(list->b+new_start, list->b+list->start, oldlen*sizeof(obj_t)); \
       list->start = new_start;                                                 \
       list->end = new_start + oldlen;                                          \
     }                                                                          \
   }                                                                            \
   assert(ptr);                                                                 \
-  memcpy(list->data+list->end, ptr, n*sizeof(obj_t));                          \
+  memcpy(list->b+list->end, ptr, n*sizeof(obj_t));                             \
   size_t idx = list->end - list->start;                                        \
   list->end += n;                                                              \
   return idx;                                                                  \
@@ -204,7 +213,7 @@ static inline void    FUNC ## _pop(list_t *list, obj_t *ptr, size_t n) {       \
   madcrow_list_verify(list);                                                   \
   assert(list->start+n <= list->end);                                          \
   list->end -= n;                                                              \
-  if(ptr) memcpy(ptr, list->data+list->end, n*sizeof(obj_t));                  \
+  if(ptr) memcpy(ptr, list->b+list->end, n*sizeof(obj_t));                     \
 }                                                                              \
                                                                                \
 /* Add an element to the start of the list */                                  \
@@ -214,17 +223,17 @@ static inline size_t  FUNC ## _unshift(list_t *list, const obj_t *ptr, size_t n)
     size_t oldlen = FUNC ## _len(list), newlen = oldlen + n;                   \
     if(newlen >= list->capacity / 2) {                                         \
       list->capacity = roundup2pow(newlen);                                    \
-      list->data = mc_realloc(list->data, list->capacity * sizeof(obj_t));     \
+      list->b = mc_realloc(list->b, list->capacity * sizeof(obj_t));           \
     }                                                                          \
     size_t new_start = (list->capacity - newlen) / 2 + n;                      \
-    memmove(list->data+new_start, list->data, oldlen*sizeof(obj_t));           \
+    memmove(list->b+new_start, list->b, oldlen*sizeof(obj_t));                 \
     list->start = new_start;                                                   \
     list->end = new_start + oldlen;                                            \
   }                                                                            \
   assert(ptr);                                                                 \
   assert(list->start >= n);                                                    \
   list->start -= n;                                                            \
-  memcpy(list->data+list->start, ptr, n*sizeof(obj_t));                        \
+  memcpy(list->b+list->start, ptr, n*sizeof(obj_t));                           \
   return 0;                                                                    \
 }                                                                              \
                                                                                \
@@ -233,7 +242,7 @@ static inline size_t  FUNC ## _unshift(list_t *list, const obj_t *ptr, size_t n)
 static inline void    FUNC ## _shift(list_t *list, obj_t *ptr, size_t n) {     \
   madcrow_list_verify(list);                                                   \
   assert(list->start+n <= list->end);                                          \
-  if(ptr) memcpy(ptr, list->data+list->start, n*sizeof(obj_t));                \
+  if(ptr) memcpy(ptr, list->b+list->start, n*sizeof(obj_t));                   \
   list->start += n;                                                            \
 }                                                                              \
                                                                                \
@@ -248,7 +257,7 @@ static inline void    FUNC ## _copy(list_t *dst, const list_t *src) {          \
   FUNC ## _capacity(dst, 2*len);                                               \
   dst->start = (dst->capacity - len) / 2;                                      \
   dst->end = dst->start + len;                                                 \
-  memcpy(dst->data+dst->start, src->data+src->start, len * sizeof(obj_t));     \
+  memcpy(dst->b+dst->start, src->b+src->start, len * sizeof(obj_t));           \
   madcrow_list_verify(dst);                                                    \
 }                                                                              \
                                                                                \
@@ -264,13 +273,13 @@ static inline size_t  FUNC ## _prepend(list_t *list, obj_t obj) {              \
 static inline obj_t   FUNC ## _lcut(list_t *list) {                            \
   madcrow_list_verify(list);                                                   \
   assert(list->start < list->end);                                             \
-  return list->data[list->start++];                                            \
+  return list->b[list->start++];                                               \
 }                                                                              \
                                                                                \
 static inline obj_t   FUNC ## _rcut(list_t *list) {                            \
   madcrow_list_verify(list);                                                   \
   assert(list->start < list->end);                                             \
-  return list->data[--list->end];                                              \
+  return list->b[--list->end];                                                 \
 }                                                                              \
                                                                                \
 static inline void    FUNC ## _getn(list_t *list, size_t idx,                  \
@@ -278,7 +287,7 @@ static inline void    FUNC ## _getn(list_t *list, size_t idx,                  \
   madcrow_list_verify(list);                                                   \
   assert(idx < list->end - list->start);                                       \
   assert(list->start+idx+n <= list->end);                                      \
-  memcpy(ptr, list->data+list->start+idx, n*sizeof(obj_t));                    \
+  memcpy(ptr, list->b+list->start+idx, n*sizeof(obj_t));                       \
 }                                                                              \
                                                                                \
 static inline void    FUNC ## _setn(list_t *list, size_t idx,                  \
@@ -286,7 +295,7 @@ static inline void    FUNC ## _setn(list_t *list, size_t idx,                  \
   madcrow_list_verify(list);                                                   \
   assert(idx < list->end - list->start);                                       \
   assert(list->start+idx+n <= list->end);                                      \
-  memcpy(list->data+list->start+idx, ptr, n*sizeof(obj_t));                    \
+  memcpy(list->b+list->start+idx, ptr, n*sizeof(obj_t));                       \
 }                                                                              \
 
 #endif /* MADCROW_LIST_H_ */
