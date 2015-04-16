@@ -243,7 +243,7 @@ static inline void    FUNC ## _set(buf_t *buf, size_t idx, obj_t obj)          \
 /* Fetch a given element */                                                    \
 static inline void    FUNC ## _getn(buf_t *buf, size_t idx, obj_t *ptr, size_t n)\
 {                                                                              \
-  assert(idx < buf->len);                                                      \
+  assert(idx+n <= buf->len);                                                   \
   memmove(ptr, buf->b+idx, n * sizeof(obj_t));                                 \
 }                                                                              \
                                                                                \
@@ -251,7 +251,7 @@ static inline void    FUNC ## _getn(buf_t *buf, size_t idx, obj_t *ptr, size_t n
 static inline void    FUNC ## _setn(buf_t *buf, size_t idx,                    \
                                     obj_t const *ptr, size_t n)                \
 {                                                                              \
-  assert(idx < buf->len);                                                      \
+  assert(idx+n <= buf->len);                                                   \
   memmove(buf->b+idx, ptr, n * sizeof(obj_t));                                 \
 }                                                                              \
                                                                                \
@@ -275,7 +275,7 @@ static inline size_t  FUNC ## _push(buf_t *buf, obj_t const *ptr, size_t n)    \
 /* @param ptr if != NULL, removed elements are copied to ptr */                \
 static inline void    FUNC ## _pop(buf_t *buf, obj_t *ptr, size_t n)           \
 {                                                                              \
-  assert(buf->len > n);                                                        \
+  assert(buf->len >= n);                                                       \
   buf->len -= n;                                                               \
   if(ptr) memmove(ptr, buf->b+buf->len, n * sizeof(obj_t));                    \
   init_mem_f(buf->b+buf->len, n);                                              \
