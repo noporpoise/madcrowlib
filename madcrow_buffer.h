@@ -5,6 +5,7 @@
 #include <string.h> // memset
 #include <assert.h>
 #include <unistd.h> // ssize_t
+#include <inttypes.h> // uint64_t
 
 //
 // madcrow_buffer.h
