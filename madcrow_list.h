@@ -57,11 +57,12 @@
 
 // Round a number up to the nearest number that is a power of two
 #ifndef leading_zeros
-  #define leading_zeros(x) ((x) ? (__typeof(x))__builtin_clzll(x) : (__typeof(x))sizeof(x)*8)
+  #define leading_zeros(x) ((x) ? (__typeof(x))__builtin_clzll(x) \
+                                : (__typeof(x))sizeof(x)*8)
 #endif
 
 #ifndef roundup2pow
-  #define roundup2pow(x) (1UL << (64 - leading_zeros(x)))
+  #define roundup2pow(x) (1UL << (64 - leading_zeros((uint64_t)(x))))
 #endif
 
 #define madcrow_list_init {.b = NULL, .start = 0, .end = 0, .capacity = 0}

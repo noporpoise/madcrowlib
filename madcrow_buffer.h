@@ -70,7 +70,7 @@
 #endif
 
 #ifndef roundup2pow
-  #define roundup2pow(x) (1UL << (64 - leading_zeros(x)))
+  #define roundup2pow(x) (1UL << (64 - leading_zeros((uint64_t)(x))))
 #endif
 
 #define madcrow_buffer_init {.b = NULL, .len = 0, .capacity = 0}
