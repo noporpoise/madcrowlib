@@ -192,7 +192,8 @@ static inline size_t  FUNC ## _push(list_t *list, const obj_t *ptr, size_t n) {\
   if(list->end + n > list->capacity) {                                         \
     size_t oldlen = FUNC ## _len(list), newlen = oldlen + n;                   \
     if(newlen >= list->capacity / 2) {                                         \
-      list->capacity = roundup2pow(list->start + newlen);                      \
+      list->capacity = list->start + newlen;                                   \
+      list->capacity = roundup2pow(list->capacity);                            \
       list->b = mc_realloc(list->b, list->capacity * sizeof(obj_t));           \
     }                                                                          \
     else {                                                                     \
