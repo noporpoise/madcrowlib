@@ -5,6 +5,7 @@
 #include <string.h> // memset
 #include <assert.h>
 #include <unistd.h> // ssize_t
+#include <inttypes.h> // uint64_t
 
 //
 // madcrow_buffer.h
@@ -70,7 +71,7 @@
 #endif
 
 #ifndef roundup2pow
-  #define roundup2pow(x) (1UL << (64 - leading_zeros(x)))
+  #define roundup2pow(x) (1UL << (64 - leading_zeros((uint64_t)(x))))
 #endif
 
 #define madcrow_buffer_init {.b = NULL, .len = 0, .capacity = 0}

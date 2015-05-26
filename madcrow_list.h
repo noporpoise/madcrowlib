@@ -5,6 +5,7 @@
 #include <string.h> // memset
 #include <assert.h>
 #include <unistd.h> // ssize_t
+#include <inttypes.h> // uint64_t
 
 //
 // madcrow_list.h
@@ -57,11 +58,12 @@
 
 // Round a number up to the nearest number that is a power of two
 #ifndef leading_zeros
-  #define leading_zeros(x) ((x) ? (__typeof(x))__builtin_clzll(x) : (__typeof(x))sizeof(x)*8)
+  #define leading_zeros(x) ((x) ? (__typeof(x))__builtin_clzll(x) \
+                                : (__typeof(x))sizeof(x)*8)
 #endif
 
 #ifndef roundup2pow
-  #define roundup2pow(x) (1UL << (64 - leading_zeros(x)))
+  #define roundup2pow(x) (1UL << (64 - leading_zeros((uint64_t)(x))))
 #endif
 
 #define madcrow_list_init {.b = NULL, .start = 0, .end = 0, .capacity = 0}
@@ -190,7 +192,8 @@ static inline size_t  FUNC ## _push(list_t *list, const obj_t *ptr, size_t n) {\
   if(list->end + n > list->capacity) {                                         \
     size_t oldlen = FUNC ## _len(list), newlen = oldlen + n;                   \
     if(newlen >= list->capacity / 2) {                                         \
-      list->capacity = roundup2pow(list->start + newlen);                      \
+      list->capacity = list->start + newlen;                                   \
+      list->capacity = roundup2pow(list->capacity);                            \
       list->b = mc_realloc(list->b, list->capacity * sizeof(obj_t));           \
     }                                                                          \
     else {                                                                     \
