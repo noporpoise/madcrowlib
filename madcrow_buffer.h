@@ -74,7 +74,7 @@
   #define roundup2pow(x) (1UL << (64 - leading_zeros((uint64_t)(x))))
 #endif
 
-#define madcrow_buffer_init {.b = NULL, .len = 0, .capacity = 0}
+#define madcrow_buffer_init {.b = NULL, .len = 0, .size = 0}
 
 #define madcrow_buffer_verify(buf) do {                                        \
   assert(buf->len <= buf->size);                                               \
@@ -82,7 +82,7 @@
 } while(0)
 
 #define MC_INIT_MEM_WIPE(arr,n) memset(arr, 0, (n)*sizeof(*(arr)))
-#define MC_INIT_MEM_UNDEF(arr,n)
+#define MC_INIT_MEM_UNDEF(arr,n) do {} while(0)
 
 #define madcrow_buffer(FUNC,buf_t,obj_t) \
         madcrow_buffer2(FUNC,buf_t,obj_t,calloc,realloc,free,MC_INIT_MEM_UNDEF)
@@ -362,19 +362,18 @@ static inline void    FUNC ## _unshift_zero(buf_t *buf, size_t n)              \
   buf->len += n;                                                               \
 }                                                                              \
                                                                                \
-                                                                               \
+/* Clone one buffer into another */                                            \
 static inline void    FUNC ## _copy(buf_t *dst, const buf_t *src) {            \
-  FUNC ## _resize(dst, src->len);                                              \
+  if(dst->len > src->len) init_mem_f(dst->b+src->len, dst->len-src->len);      \
+  FUNC ## _capacity(dst, src->len);                                            \
   memmove(dst->b, src->b, sizeof(obj_t) * src->len);                           \
   dst->len = src->len;                                                         \
 }                                                                              \
                                                                                \
+/* Expand but never shrink array length */                                     \
 static inline void    FUNC ## _resize(buf_t *buf, size_t len) {                \
   FUNC ## _capacity(buf, len);                                                 \
-  if(buf->len < len) {                                                         \
-    init_mem_f(buf->b+buf->len, buf->len-len);                                 \
-    buf->len = len;                                                            \
-  }                                                                            \
+  if(len > buf->len) buf->len = len;                                           \
 }                                                                              \
 
 #endif /* MADCROW_BUFFER_H_ */
