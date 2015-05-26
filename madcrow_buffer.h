@@ -363,14 +363,17 @@ static inline void    FUNC ## _unshift_zero(buf_t *buf, size_t n)              \
                                                                                \
                                                                                \
 static inline void    FUNC ## _copy(buf_t *dst, const buf_t *src) {            \
-  FUNC ## _capacity(dst, src->len);                                            \
+  FUNC ## _resize(dst, src->len);                                              \
   memmove(dst->b, src->b, sizeof(obj_t) * src->len);                           \
   dst->len = src->len;                                                         \
 }                                                                              \
                                                                                \
 static inline void    FUNC ## _resize(buf_t *buf, size_t len) {                \
   FUNC ## _capacity(buf, len);                                                 \
-  if(buf->len < len) buf->len = len;                                           \
+  if(buf->len < len) {                                                         \
+    init_mem_f(buf->b+buf->len, buf->len-len);                                 \
+    buf->len = len;                                                            \
+  }                                                                            \
 }                                                                              \
 
 #endif /* MADCROW_BUFFER_H_ */
