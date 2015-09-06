@@ -44,6 +44,7 @@
 //   void       clist_setn    (CharList *list, size_t idx,
 //                             char const *ptr, size_t n)
 //   char*     clist_getptr   (CharList *list, size_t idx)
+//   cosnt char* clist_getconstptr(const CharList *list, size_t idx)
 //
 //   size_t     clist_push    (CharList *list, char const *ptr, size_t n)
 //   void       clist_pop     (CharList *list, char *ptr, size_t n)
@@ -115,6 +116,8 @@ static inline void    FUNC ## _set(list_t *list, size_t idx, obj_t obj)        \
  __attribute__((unused));                                                      \
 static inline obj_t*   FUNC ## _getptr(list_t *list, size_t idx)               \
  __attribute__((unused));                                                      \
+static inline const obj_t*   FUNC ## _getconstptr(const list_t *list, size_t idx)\
+ __attribute__((unused));                                                      \
 \
 static inline size_t  FUNC ## _prepend(list_t *list, obj_t obj)                \
  __attribute__((unused));                                                      \
@@ -154,6 +157,12 @@ static inline obj_t   FUNC ## _get(list_t *list, size_t idx) {                 \
 }                                                                              \
                                                                                \
 static inline obj_t*  FUNC ## _getptr(list_t *list, size_t idx) {              \
+  madcrow_list_verify(list);                                                   \
+  assert(idx < list->end - list->start);                                       \
+  return list->b + list->start + idx;                                          \
+}                                                                              \
+                                                                               \
+static inline const obj_t*  FUNC ## _getconstptr(const list_t *list, size_t idx) {\
   madcrow_list_verify(list);                                                   \
   assert(idx < list->end - list->start);                                       \
   return list->b + list->start + idx;                                          \
