@@ -44,11 +44,10 @@
 //   void       clist_setn    (CharList *list, size_t idx,
 //                             char const *ptr, size_t n)
 //   char*     clist_getptr   (CharList *list, size_t idx)
-//   cosnt char* clist_getconstptr(const CharList *list, size_t idx)
 //
-//   size_t     clist_push    (CharList *list, char const *ptr, size_t n)
+//   size_t     clist_push    (CharList *list, char *ptr, size_t n)
 //   void       clist_pop     (CharList *list, char *ptr, size_t n)
-//   void       clist_unshift (CharList *list, char const *ptr, size_t n)
+//   void       clist_unshift (CharList *list, char *ptr, size_t n)
 //   void       clist_shift   (CharList *list, char *ptr, size_t n)
 //
 //   void       clist_copy    (CharList *dst, const CharList *src)
@@ -96,11 +95,11 @@ static inline void    FUNC ## _dealloc(list_t *list)                           \
  __attribute__((unused));                                                      \
 static inline void    FUNC ## _capacity(list_t *list, size_t cap)              \
  __attribute__((unused));                                                      \
-static inline size_t  FUNC ## _push(list_t *list, const obj_t *obj, size_t n)  \
+static inline size_t  FUNC ## _push(list_t *list, obj_t *obj, size_t n)        \
  __attribute__((unused));                                                      \
 static inline void    FUNC ## _pop(list_t *list, obj_t *ptr, size_t n)         \
  __attribute__((unused));                                                      \
-static inline size_t  FUNC ## _unshift(list_t *list, const obj_t *ptr, size_t n)\
+static inline size_t  FUNC ## _unshift(list_t *list, obj_t *ptr, size_t n)     \
  __attribute__((unused));                                                      \
 static inline void    FUNC ## _shift(list_t *list, obj_t *ptr, size_t n)       \
  __attribute__((unused));                                                      \
@@ -115,8 +114,6 @@ static inline obj_t   FUNC ## _get(list_t *list, size_t idx)                   \
 static inline void    FUNC ## _set(list_t *list, size_t idx, obj_t obj)        \
  __attribute__((unused));                                                      \
 static inline obj_t*   FUNC ## _getptr(list_t *list, size_t idx)               \
- __attribute__((unused));                                                      \
-static inline const obj_t*   FUNC ## _getconstptr(const list_t *list, size_t idx)\
  __attribute__((unused));                                                      \
 \
 static inline size_t  FUNC ## _prepend(list_t *list, obj_t obj)                \
@@ -162,12 +159,6 @@ static inline obj_t*  FUNC ## _getptr(list_t *list, size_t idx) {              \
   return list->b + list->start + idx;                                          \
 }                                                                              \
                                                                                \
-static inline const obj_t*  FUNC ## _getconstptr(const list_t *list, size_t idx) {\
-  madcrow_list_verify(list);                                                   \
-  assert(idx < list->end - list->start);                                       \
-  return list->b + list->start + idx;                                          \
-}                                                                              \
-                                                                               \
 static inline void    FUNC ## _set(list_t *list, size_t idx, obj_t obj) {      \
   madcrow_list_verify(list);                                                   \
   assert(idx < list->end - list->start);                                       \
@@ -196,7 +187,7 @@ static inline void    FUNC ## _capacity(list_t *list, size_t cap) {            \
 }                                                                              \
                                                                                \
 /* Add an element to the end of the list */                                    \
-static inline size_t  FUNC ## _push(list_t *list, const obj_t *ptr, size_t n) {\
+static inline size_t  FUNC ## _push(list_t *list, obj_t *ptr, size_t n) {      \
   madcrow_list_verify(list);                                                   \
   if(list->end + n > list->capacity) {                                         \
     size_t oldlen = FUNC ## _len(list), newlen = oldlen + n;                   \
@@ -207,7 +198,7 @@ static inline size_t  FUNC ## _push(list_t *list, const obj_t *ptr, size_t n) {\
     }                                                                          \
     else {                                                                     \
       size_t new_start = (list->capacity - newlen) / 2;                        \
-      memmove(list->b+new_start, list->b+list->start, oldlen*sizeof(obj_t)); \
+      memmove(list->b+new_start, list->b+list->start, oldlen*sizeof(obj_t));   \
       list->start = new_start;                                                 \
       list->end = new_start + oldlen;                                          \
     }                                                                          \
@@ -229,7 +220,7 @@ static inline void    FUNC ## _pop(list_t *list, obj_t *ptr, size_t n) {       \
 }                                                                              \
                                                                                \
 /* Add an element to the start of the list */                                  \
-static inline size_t  FUNC ## _unshift(list_t *list, const obj_t *ptr, size_t n) {\
+static inline size_t  FUNC ## _unshift(list_t *list, obj_t *ptr, size_t n) {   \
   madcrow_list_verify(list);                                                   \
   if(list->start == 0) {                                                       \
     size_t oldlen = FUNC ## _len(list), newlen = oldlen + n;                   \
