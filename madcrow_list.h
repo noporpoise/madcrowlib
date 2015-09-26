@@ -77,6 +77,11 @@
 #define madcrow_list(name,list_t,obj_t) \
         madcrow_list2(name,list_t,obj_t,calloc,realloc,free)
 
+// MACROs
+#define mdc_list_getptr(l,idx) ((l)->b + (l)->start + (idx))
+#define mdc_list_get(l,idx) (*mdc_list_getptr(l,idx))
+#define mdc_list_len(l) ((l)->end - (l)->start)
+
 #define madcrow_list2(FUNC,list_t,obj_t,mc_alloc,mc_realloc,mc_free)           \
                                                                                \
 typedef struct {                                                               \

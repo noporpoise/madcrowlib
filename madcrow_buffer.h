@@ -90,6 +90,11 @@
 #define madcrow_buffer_wipe(FUNC,buf_t,obj_t) \
         madcrow_buffer2(FUNC,buf_t,obj_t,calloc,realloc,free,MC_INIT_MEM_WIPE)
 
+// MACROs
+#define mdc_buf_getptr(l,idx) ((l)->b + (idx))
+#define mdc_buf_get(l,idx) (*mdc_buf_getptr(l,idx))
+#define mdc_buf_len(l) ((l)->len)
+
 // init_mem_f is one of MC_INIT_MEM_WIPE or MC_INIT_MEM_UNDEF
 #define madcrow_buffer2(FUNC,buf_t,obj_t,mc_alloc,mc_realloc,mc_free,init_mem_f)\
                                                                                \
