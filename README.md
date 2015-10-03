@@ -117,3 +117,10 @@ macro to verify that a linkedlist is a valid structure:
     LinkedList llist = madcrow_linkedlist_init;
     madcrow_linkedlist_verify(&llist);
 
+
+Development:
+------------
+
+TODO:
+- [] circular buffer? Or re-write madcrow_list.h as a circular buffer?
+

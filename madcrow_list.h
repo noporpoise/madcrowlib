@@ -69,9 +69,9 @@
 #define madcrow_list_init {.b = NULL, .start = 0, .end = 0, .capacity = 0}
 
 #define madcrow_list_verify(list) do {                                         \
-  assert(list->start <= list->end);                                            \
-  assert(list->end <= list->capacity);                                         \
-  assert(list->capacity == 0 || list->b != NULL);                              \
+  assert((list)->start <= (list)->end);                                        \
+  assert((list)->end <= (list)->capacity);                                     \
+  assert((list)->capacity == 0 || (list)->b != NULL);                          \
 } while(0)
 
 #define madcrow_list(name,list_t,obj_t) \
