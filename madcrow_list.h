@@ -224,24 +224,24 @@ static inline void    FUNC ## _pop(list_t *list, obj_t *ptr, size_t n) {       \
   if(ptr) memcpy(ptr, list->b+list->end, n*sizeof(obj_t));                     \
 }                                                                              \
                                                                                \
-/* Add an element to the start of the list */                                  \
-static inline size_t  FUNC ## _unshift(list_t *list, obj_t *ptr, size_t n) {   \
-  madcrow_list_verify(list);                                                   \
-  if(list->start == 0) {                                                       \
-    size_t oldlen = FUNC ## _len(list), newlen = oldlen + n;                   \
-    if(newlen >= list->capacity / 2) {                                         \
-      list->capacity = roundup2pow(newlen);                                    \
-      list->b = mc_realloc(list->b, list->capacity * sizeof(obj_t));           \
+/* Add one or more elements to the start of the list */                        \
+static inline size_t  FUNC ## _unshift(list_t *l, obj_t *ptr, size_t n) {      \
+  madcrow_list_verify(l);                                                      \
+  if(l->start < n) {                                                           \
+    size_t oldlen = FUNC ## _len(l), newlen = oldlen + n;                      \
+    if(newlen >= l->capacity / 2) {                                            \
+      l->capacity = roundup2pow(newlen);                                       \
+      l->b = mc_realloc(l->b, l->capacity * sizeof(obj_t));                    \
     }                                                                          \
-    size_t new_start = (list->capacity - newlen) / 2 + n;                      \
-    memmove(list->b+new_start, list->b, oldlen*sizeof(obj_t));                 \
-    list->start = new_start;                                                   \
-    list->end = new_start + oldlen;                                            \
+    size_t new_start = (l->capacity - newlen) / 2 + n;                         \
+    memmove(l->b+new_start, l->b+l->start, oldlen*sizeof(obj_t));              \
+    l->start = new_start;                                                      \
+    l->end = new_start + oldlen;                                               \
   }                                                                            \
   assert(ptr);                                                                 \
-  assert(list->start >= n);                                                    \
-  list->start -= n;                                                            \
-  memcpy(list->b+list->start, ptr, n*sizeof(obj_t));                           \
+  assert(l->start >= n);                                                       \
+  l->start -= n;                                                               \
+  memcpy(l->b+l->start, ptr, n*sizeof(obj_t));                                 \
   return 0;                                                                    \
 }                                                                              \
                                                                                \
