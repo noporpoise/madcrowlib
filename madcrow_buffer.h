@@ -65,13 +65,11 @@
 //
 
 // Round a number up to the nearest number that is a power of two
-#ifndef leading_zeros
-  #define leading_zeros(x) ((x) ? (__typeof(x))__builtin_clzll(x) \
-                                : (__typeof(x))sizeof(x)*8)
-#endif
-
-#ifndef roundup2pow
-  #define roundup2pow(x) (1UL << (64 - leading_zeros((uint64_t)(x))))
+#ifndef roundup64
+  #define roundup64(x) roundup64(x)
+  static inline uint64_t roundup64(uint64_t x) {
+    return (--x, x|=x>>1, x|=x>>2, x|=x>>4, x|=x>>8, x|=x>>16, x|=x>>32, ++x);
+  }
 #endif
 
 #define madcrow_buffer_init {.b = NULL, .len = 0, .size = 0}
@@ -196,7 +194,7 @@ static inline void    FUNC ## _reset(buf_t *buf) {                             \
                                                                                \
 static inline void    FUNC ## _capacity(buf_t *buf, size_t cap) {              \
   if(cap > buf->size) {                                                        \
-    cap = roundup2pow(cap);                                                    \
+    cap = roundup64(cap);                                                      \
     buf->b = mc_realloc(buf->b, cap * sizeof(obj_t));                          \
     init_mem_f(buf->b + buf->size, cap - buf->size);                           \
     buf->size = cap;                                                           \

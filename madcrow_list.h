@@ -57,13 +57,11 @@
 //
 
 // Round a number up to the nearest number that is a power of two
-#ifndef leading_zeros
-  #define leading_zeros(x) ((x) ? (__typeof(x))__builtin_clzll(x) \
-                                : (__typeof(x))sizeof(x)*8)
-#endif
-
-#ifndef roundup2pow
-  #define roundup2pow(x) (1UL << (64 - leading_zeros((uint64_t)(x))))
+#ifndef roundup64
+  #define roundup64(x) roundup64(x)
+  static inline uint64_t roundup64(uint64_t x) {
+    return (--x, x|=x>>1, x|=x>>2, x|=x>>4, x|=x>>8, x|=x>>16, x|=x>>32, ++x);
+  }
 #endif
 
 #define madcrow_list_init {.b = NULL, .start = 0, .end = 0, .capacity = 0}
@@ -171,7 +169,7 @@ static inline void    FUNC ## _set(list_t *list, size_t idx, obj_t obj) {      \
 }                                                                              \
                                                                                \
 static inline void    FUNC ## _alloc(list_t *list, size_t capacity) {          \
-  list->capacity = capacity < 8 ? 8 : roundup2pow(capacity);                   \
+  list->capacity = capacity < 8 ? 8 : roundup64(capacity);                     \
   list->b = mc_alloc(list->capacity, sizeof(obj_t));                           \
   list->start = list->end = list->capacity / 2;                                \
 }                                                                              \
@@ -185,7 +183,7 @@ static inline void    FUNC ## _dealloc(list_t *list) {                         \
 static inline void    FUNC ## _capacity(list_t *list, size_t cap) {            \
   madcrow_list_verify(list);                                                   \
   if(cap > list->capacity) {                                                   \
-    cap = roundup2pow(cap);                                                    \
+    cap = roundup64(cap);                                                      \
     list->b = mc_realloc(list->b, list->capacity * sizeof(obj_t));             \
     list->capacity = cap;                                                      \
   }                                                                            \
@@ -198,7 +196,7 @@ static inline size_t  FUNC ## _push(list_t *list, obj_t *ptr, size_t n) {      \
     size_t oldlen = FUNC ## _len(list), newlen = oldlen + n;                   \
     if(newlen >= list->capacity / 2) {                                         \
       list->capacity = list->start + newlen;                                   \
-      list->capacity = roundup2pow(list->capacity);                            \
+      list->capacity = roundup64(list->capacity);                              \
       list->b = mc_realloc(list->b, list->capacity * sizeof(obj_t));           \
     }                                                                          \
     else {                                                                     \
@@ -230,7 +228,7 @@ static inline size_t  FUNC ## _unshift(list_t *l, obj_t *ptr, size_t n) {      \
   if(l->start < n) {                                                           \
     size_t oldlen = FUNC ## _len(l), newlen = oldlen + n;                      \
     if(newlen >= l->capacity / 2) {                                            \
-      l->capacity = roundup2pow(newlen);                                       \
+      l->capacity = roundup64(newlen);                                         \
       l->b = mc_realloc(l->b, l->capacity * sizeof(obj_t));                    \
     }                                                                          \
     size_t new_start = (l->capacity - newlen) / 2 + n;                         \
